@@ -5,9 +5,34 @@ import OTP from "@/components/UI/OTP";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { toggleAuth } from "@/redux/Slices/authSlice";
-
+import Link from "next/link";
+import { signupFormSchema } from "@/config/JoiSchema";
+import { errorToast } from "@/config/Toasts";
+import { useState } from "react";
 export default function Signup() {
   const dispatch = useDispatch<AppDispatch>();
+
+  const [fullname, setFullname] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState<string>("");
+  const [password, SetPassword] = useState<string>("");
+
+  // handle form submition
+  const handleFormSubmition = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // validate the inputs
+    const formData = { phone, password };
+    const { error, value } = signupFormSchema.validate(formData);
+    if (error) {
+      const errorMessage = error.details.map((err) => err.message).join(", ");
+      errorToast(errorMessage);
+    } else {
+      console.log(value);
+    }
+    // check input validation then send the data
+  };
+
   return (
     <div className="flex mt-10 bg-white/40 backdrop-blur-2xl rounded-lg shadow-lg overflow-hidden mx-auto max-w-sm lg:max-w-4xl">
       <div
@@ -26,7 +51,7 @@ export default function Signup() {
           />
         </div>
         <p className="text-xl text-gray-600 text-center">ثبت نام در سایت</p>
-        <a
+        <Link
           href="#"
           className="flex items-center justify-center mt-4 text-white rounded-lg shadow-md transition-colors bg-gray-100 hover:bg-gray-100/60">
           <div className="px-4 py-3">
@@ -52,7 +77,7 @@ export default function Signup() {
           <h1 className="px-4 py-3 w-5/6 text-center text-gray-600 font-medium">
             از طریق گوگل
           </h1>
-        </a>
+        </Link>
         <div className="mt-4 flex items-center justify-between">
           <span className="border-b w-1/5 lg:w-1/4"></span>
           <span className="text-xs text-center text-gray-500 uppercase">
@@ -71,6 +96,8 @@ export default function Signup() {
             <input
               className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
               type="text"
+              name="fullname"
+              onChange={(e) => handleFormChange(e)}
             />
           </div>
           {/* email */}
@@ -83,6 +110,8 @@ export default function Signup() {
             <input
               className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
               type="email"
+              name="email"
+              onChange={(e) => handleFormChange(e)}
               placeholder="Example@gmail.com"
               dir="ltr"
             />
@@ -97,6 +126,8 @@ export default function Signup() {
             <input
               className="bg-gray-200 pl-15 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
               type="text"
+              name="phone"
+              onChange={(e) => handleFormChange(e)}
               dir="ltr"
               maxLength={10}
             />
@@ -119,12 +150,16 @@ export default function Signup() {
           <input
             className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
             type="password"
+            name="password"
+            onChange={(e) => handleFormChange(e)}
             autoComplete="new-password"
           />
         </div>
         {/* enter button */}
         <div className="mt-8 [&>*]:h-13">
-          <button className="bg-gray-700 text-white font-bold py-2 px-4 w-full rounded hover:bg-gray-600 flex justify-center items-center gap-1 hover:gap-5 transition-all cursor-pointer">
+          <button
+            onClick={(e) => handleFormSubmition(e)}
+            className="bg-gray-700 text-white font-bold py-2 px-4 w-full rounded hover:bg-gray-600 flex justify-center items-center gap-1 hover:gap-5 transition-all cursor-pointer">
             ثبت نام <IoIosArrowRoundBack className="" />
           </button>
         </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import BlurText from "../../../blocks/TextAnimations/BlurText/BlurText";
 import OTP from "@/components/UI/OTP";
@@ -6,9 +6,33 @@ import { MdOutlineTextsms } from "react-icons/md";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { toggleAuth } from "@/redux/Slices/authSlice";
+import { useState } from "react";
+import { loginFormSchema } from "@/config/JoiSchema";
+import { errorToast } from "@/config/Toasts";
+import Link from "next/link";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
+
+  const [phone, setPhone] = useState<string>("");
+  const [password, SetPassword] = useState<string>("");
+
+  // handle form submition
+  const handleFormSubmition = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // validate the inputs
+    const formData = { phone, password };
+    const { error, value } = loginFormSchema.validate(formData);
+    if (error) {
+      const errorMessage = error.details.map((err) => err.message).join(", ");
+      errorToast(errorMessage);
+    } else {
+      console.log(value);
+    }
+    // check input validation then send the data
+  };
+
   return (
     <div className="flex mt-10 bg-white/40 backdrop-blur-2xl rounded-lg shadow-lg overflow-hidden mx-auto max-w-sm lg:max-w-4xl">
       <div
@@ -27,7 +51,7 @@ export default function Login() {
           />
         </div>
         <p className="text-xl text-gray-600 text-center">ورود به سایت</p>
-        <a
+        <Link
           href="#"
           className="flex items-center justify-center mt-4 text-white rounded-lg shadow-md transition-colors bg-gray-100 hover:bg-gray-100/60">
           <div className="px-4 py-3">
@@ -53,7 +77,7 @@ export default function Login() {
           <h1 className="px-4 py-3 w-5/6 text-center text-gray-600 font-medium">
             از طریق گوگل
           </h1>
-        </a>
+        </Link>
         <div className="mt-4 flex items-center justify-between">
           <span className="border-b w-1/5 lg:w-1/4"></span>
           <span className="text-xs text-center text-gray-500 uppercase">
@@ -71,6 +95,9 @@ export default function Login() {
               className="bg-gray-200 pl-15 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
               type="text"
               dir="ltr"
+              name="phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               maxLength={10}
             />
             <span className="absolute left-3 border-r-2 pr-3 font-bold text-gray-700">
@@ -85,19 +112,25 @@ export default function Login() {
             <label className="block text-gray-700 text-sm font-bold mb-2">
               رمز ورود
             </label>
-            {/* <a href="#" className="text-xs text-gray-500">
-                رمز را فراموش کرده اید ؟
-              </a> */}
+            <Link href="#" className="text-xs text-gray-500">
+              رمز را فراموش کرده اید ؟
+            </Link>
           </div>
           <input
             className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
             type="password"
+            name="password"
+            value={password}
+            onChange={(e) => SetPassword(e.target.value)}
             autoComplete="new-password"
           />
         </div>
         {/* enter button */}
         <div className="mt-8 flex gap-2 [&>*]:h-13">
-          <button className="bg-gray-700 text-white font-bold py-2 px-4 w-full rounded hover:bg-gray-600 flex justify-center items-center gap-1 hover:gap-5 transition-all cursor-pointer">
+          <button
+            onClick={(e) => handleFormSubmition(e)}
+            type="submit"
+            className="bg-gray-700 text-white font-bold py-2 px-4 w-full rounded hover:bg-gray-600 flex justify-center items-center gap-1 hover:gap-5 transition-all cursor-pointer">
             ورود
             <IoIosArrowRoundBack className="" />
           </button>
