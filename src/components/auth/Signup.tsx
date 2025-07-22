@@ -22,7 +22,7 @@ export default function Signup() {
     e.preventDefault();
 
     // validate the inputs
-    const formData = { phone, password };
+    const formData = { fullname, phone, password, email };
     const { error, value } = signupFormSchema.validate(formData);
     if (error) {
       const errorMessage = error.details.map((err) => err.message).join(", ");
@@ -97,7 +97,8 @@ export default function Signup() {
               className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
               type="text"
               name="fullname"
-              onChange={(e) => handleFormChange(e)}
+              value={fullname}
+              onChange={(e) => setFullname(e.target.value)}
             />
           </div>
           {/* email */}
@@ -111,7 +112,8 @@ export default function Signup() {
               className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
               type="email"
               name="email"
-              onChange={(e) => handleFormChange(e)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Example@gmail.com"
               dir="ltr"
             />
@@ -127,7 +129,8 @@ export default function Signup() {
               className="bg-gray-200 pl-15 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
               type="text"
               name="phone"
-              onChange={(e) => handleFormChange(e)}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               dir="ltr"
               maxLength={10}
             />
@@ -151,7 +154,8 @@ export default function Signup() {
             className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
             type="password"
             name="password"
-            onChange={(e) => handleFormChange(e)}
+            value={password}
+            onChange={(e) => SetPassword(e.target.value)}
             autoComplete="new-password"
           />
         </div>
