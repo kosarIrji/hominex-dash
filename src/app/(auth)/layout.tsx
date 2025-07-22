@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Wrapper from "@/components/Wrapper";
 
 export const metadata: Metadata = {
   title: "هومینکس | داشبورد",
@@ -25,7 +26,7 @@ export default function AuthLayout({
     <div
       className="relative h-screen w-screen bg-gray-100 bg-cover"
       style={{ backgroundImage: "url('/assets/img/_login.jpg')" }}>
-      {children}
+      <Wrapper>{children}</Wrapper>
     </div>
   );
 }

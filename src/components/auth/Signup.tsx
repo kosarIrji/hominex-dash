@@ -2,8 +2,12 @@ import React from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import BlurText from "../../../blocks/TextAnimations/BlurText/BlurText";
 import OTP from "@/components/UI/OTP";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store";
+import { toggleAuth } from "@/redux/Slices/authSlice";
 
 export default function Signup() {
+  const dispatch = useDispatch<AppDispatch>();
   return (
     <div className="flex mt-10 bg-white/40 backdrop-blur-2xl rounded-lg shadow-lg overflow-hidden mx-auto max-w-sm lg:max-w-4xl">
       <div
@@ -126,9 +130,11 @@ export default function Signup() {
         </div>
         <div className="mt-4 flex items-center justify-between">
           <span className="border-b w-1/5 md:w-1/4"></span>
-          <a href="#" className="text-xs text-gray-500 uppercase">
+          <span
+            onClick={() => dispatch(toggleAuth())}
+            className="text-xs text-gray-500 cursor-pointer hover:text-black transition-colors">
             ورود به سایت
-          </a>
+          </span>
           <span className="border-b w-1/5 md:w-1/4"></span>
         </div>
       </div>

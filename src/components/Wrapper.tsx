@@ -1,5 +1,13 @@
-import React from "react";
+"use client";
 
-export default function Wrapper({}) {
-  return <div>Wrapper</div>;
+import React, { ReactNode } from "react";
+import { Provider } from "react-redux";
+import { store } from "@/redux/store";
+
+type componentType = {
+  children: ReactNode;
+};
+
+export default function Wrapper({ children }: componentType) {
+  return <Provider store={store}>{children}</Provider>;
 }
