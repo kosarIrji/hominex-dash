@@ -36,8 +36,10 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: white;
+  --foreground: #1e213b;
+  --light-forground: #f4f6fa;
+  --blue: #469cf1;
 }
 
 @theme inline {
@@ -51,15 +53,15 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-  }
-} */
+  } */
+/* } */
 html,
 body {
+  background: var(--light-forground);
   width: 100vw;
   height: 100vh;
 }
 body {
-  background: var(--background);
   color: var(--foreground);
   font-family: "Morabba", Arial, Helvetica, sans-serif;
 }

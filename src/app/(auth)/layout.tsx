@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Wrapper from "@/components/Wrapper";
-import { ToastContainer } from "react-toastify";
 
 export const metadata: Metadata = {
   title: "هومینکس | داشبورد",
@@ -28,7 +26,6 @@ export default function AuthLayout({
       className="relative h-screen w-screen bg-gray-100 bg-cover"
       style={{ backgroundImage: "url('/assets/img/_login.jpg')" }}>
       <Wrapper>{children}</Wrapper>
-      <ToastContainer />
     </div>
   );
 }

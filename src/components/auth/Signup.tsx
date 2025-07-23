@@ -9,6 +9,8 @@ import Link from "next/link";
 import { signupFormSchema } from "@/config/JoiSchema";
 import { errorToast } from "@/config/Toasts";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
+
 export default function Signup() {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -51,8 +53,8 @@ export default function Signup() {
           />
         </div>
         <p className="text-xl text-gray-600 text-center">ثبت نام در سایت</p>
-        <Link
-          href="#"
+        <span
+          onClick={() => signIn("google", { redirectTo: "/" })}
           className="flex items-center justify-center mt-4 text-white rounded-lg shadow-md transition-colors bg-gray-100 hover:bg-gray-100/60">
           <div className="px-4 py-3">
             <svg className="h-6 w-6" viewBox="0 0 40 40">
@@ -74,10 +76,10 @@ export default function Signup() {
               />
             </svg>
           </div>
-          <h1 className="px-4 py-3 w-5/6 text-center text-gray-600 font-medium">
+          <h1 className="px-4 py-3 w-5/6 cursor-pointer text-center text-gray-600 font-medium">
             از طریق گوگل
           </h1>
-        </Link>
+        </span>
         <div className="mt-4 flex items-center justify-between">
           <span className="border-b w-1/5 lg:w-1/4"></span>
           <span className="text-xs text-center text-gray-500 uppercase">

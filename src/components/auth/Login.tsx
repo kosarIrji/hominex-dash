@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import BlurText from "../../../blocks/TextAnimations/BlurText/BlurText";
@@ -10,6 +11,7 @@ import { useState } from "react";
 import { loginFormSchema } from "@/config/JoiSchema";
 import { errorToast } from "@/config/Toasts";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
@@ -51,9 +53,9 @@ export default function Login() {
           />
         </div>
         <p className="text-xl text-gray-600 text-center">ورود به سایت</p>
-        <Link
-          href="#"
-          className="flex items-center justify-center mt-4 text-white rounded-lg shadow-md transition-colors bg-gray-100 hover:bg-gray-100/60">
+        <span
+          onClick={() => signIn("google", { redirectTo: "/" })}
+          className="flex cursor-pointer items-center justify-center mt-4 text-white rounded-lg shadow-md transition-colors bg-gray-100 hover:bg-gray-100/60">
           <div className="px-4 py-3">
             <svg className="h-6 w-6" viewBox="0 0 40 40">
               <path
@@ -77,7 +79,7 @@ export default function Login() {
           <h1 className="px-4 py-3 w-5/6 text-center text-gray-600 font-medium">
             از طریق گوگل
           </h1>
-        </Link>
+        </span>
         <div className="mt-4 flex items-center justify-between">
           <span className="border-b w-1/5 lg:w-1/4"></span>
           <span className="text-xs text-center text-gray-500 uppercase">
