@@ -22,7 +22,7 @@ export default function Sidebar() {
     <div
       className={`absolute ${
         Sidebar ? "right-0" : "right-[-100%]"
-      } top-0 h-screen w-[15rem] bg-[var(--background)]/10 backdrop-blur-md shadow-2xl transition-all z-10`}>
+      } top-0 h-screen w-[15rem] bg-[var(--background)]/70 backdrop-blur-md shadow-2xl transition-all z-10`}>
       <div className="flex flex-row items-center py-1 px-3">
         <Image
           alt="hominex logo"
@@ -43,7 +43,7 @@ export default function Sidebar() {
             }}
             className={`${
               item.path === route &&
-              "bg-gray-800 text-white rounded-md ring-4 outline-none ring-gray-300"
+              "bg-gray-800 text-white rounded-md ring-4 outline-none ring-gray-400"
             } mx-5 `}>
             {i === 0 && <RiHome6Line className="w-5 h-5 mx-2" />}
             {i === 1 && <RiAccountPinCircleLine className="w-5 h-5 mx-2" />}

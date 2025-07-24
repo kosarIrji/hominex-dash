@@ -1,4 +1,6 @@
 import React from "react";
+import { FaRegTrashAlt } from "react-icons/fa";
+import Link from "next/link"; // assuming you're using Next.js
 
 type Property = {
   id: number;
@@ -14,6 +16,10 @@ interface Props {
 }
 
 export default function LikedProperty({ likedProperties, onRemove }: Props) {
+  const handleRemove = (id: number) => {
+    onRemove(id);
+  };
+
   if (likedProperties.length === 0) {
     return (
       <div className="p-4 text-center text-gray-500">
@@ -22,45 +28,32 @@ export default function LikedProperty({ likedProperties, onRemove }: Props) {
     );
   }
 
-  const handleRemove = (id: number) => {
-    console.log("Remove property with ID:", id);
-    onRemove(id); // Call the parent function
-  };
-
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">لیست علاقه‌مندی‌ها</h2>
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {likedProperties.map((property) => (
+    <div className="p-4" dir="ltr">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-3">
+        {likedProperties.map((property, i) => (
           <div
-            key={property.id}
-            className="bg-white shadow rounded-xl overflow-hidden flex flex-col"
-            dir="rtl">
-            <img
-              src={
-                "https://cdn.nody.ir/files/2021/09/21/nody-%D8%B9%DA%A9%D8%B3-%D8%AE%D8%A7%D9%86%D9%87-%D8%AA%DB%8C%D9%85%DB%8C-%D8%B2%D8%B9%D9%81%D8%B1%D8%A7%D9%86%DB%8C%D9%87-1632176841.jpg"
-              }
-              alt={property.name}
-              className="w-full h-40 object-cover"
-            />
-            <div className="p-3 flex-1 flex flex-col justify-between">
-              <div className="flex flex-col gap-3">
-                <h3 className="text-lg font-semibold">{property.name}</h3>
-                <p className="text-gray-500 text-sm">
-                  👁️ بازدید: {property.views}
-                </p>
-              </div>
-              <div className="mt-4 flex flex-col gap-2">
-                <a
-                  href={property.url}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-center py-1 px-3 rounded">
-                  مشاهده ملک
-                </a>
-                <button
-                  onClick={() => handleRemove(property.id)}
-                  className="bg-red-500 cursor-pointer hover:bg-red-600 text-white py-1 px-3 rounded">
-                  حذف از علاقه‌مندی‌ها
-                </button>
+            key={i}
+            className="rounded-xl overflow-hidden relative group transition-all shadow-md">
+            <div
+              className="aspect-[4/3] bg-cover bg-center flex content-end"
+              style={{
+                backgroundImage: `url(https://cdn.nody.ir/files/2021/09/21/nody-%D8%B9%DA%A9%D8%B3-%D8%AE%D8%A7%D9%86%D9%87-%D8%AA%DB%8C%D9%85%DB%8C-%D8%B2%D8%B9%D9%81%D8%B1%D8%A7%D9%86%DB%8C%D9%87-1632176841.jpg)`,
+              }}>
+              <div className=" w-full inset-0 bg-gradient-to-t from-black via-black/40 h-1/3 to-transparent backdrop-blur-sm p-4 flex flex-col justify-end text-white">
+                <div className="flex flex-row-reverse justify-between items-center">
+                  <div className="text-end flex flex-col gap-1">
+                    <Link href={property.url}>
+                      <h3 className="text-lg font-semibold">{property.name}</h3>
+                    </Link>
+                    <p className="text-sm">بازدید: {property.views} 👁️ </p>
+                  </div>
+                  <button
+                    onClick={() => handleRemove(property.id)}
+                    className="hover:text-red-400 transition cursor-pointer">
+                    <FaRegTrashAlt size={18} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

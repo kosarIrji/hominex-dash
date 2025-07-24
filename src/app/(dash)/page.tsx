@@ -30,7 +30,9 @@ export default function page() {
         <span className="text-gray-500">Dashboard /</span>
         {route === "dashboard" ? "" : route}
       </span>
-      <div className="bg-[var(--background)] my-5 shadow-2xl rounded-md p-5">
+      <div
+        className="bg-[var(--background)] my-5 shadow-2xl rounded-md p-5 overflow-x-hidden overflow-y-auto]"
+        style={{ height: "calc(100vh - 150px)" }}>
         {route === "dashboard" && <Main />}
         {route === "ticket" && <Tickets />}
         {route === "management" && <Management />}
