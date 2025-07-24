@@ -3,6 +3,8 @@ import React from "react";
 import { LuTickets } from "react-icons/lu";
 import { useDispatch } from "react-redux";
 import { switchRoute } from "@/redux/Slices/routeSwitch";
+import { toggleSidebar } from "@/redux/Slices/sidebar";
+
 export default function Ticket() {
   const dispatch = useDispatch<AppDispatch>();
   return (
@@ -13,7 +15,10 @@ export default function Ticket() {
         جهت ارتباط با پشتیبانی تیکت خود را ثبت نمایید.
       </span>
       <button
-        onClick={() => dispatch(switchRoute("ticket"))}
+        onClick={() => {
+          dispatch(toggleSidebar(false));
+          dispatch(switchRoute("ticket"));
+        }}
         className=" transition-all hover:bg-gray-700 py-2 text-[15px] font-medium px-3 bg-gray-800 rounded-md shadow-2xl cursor-pointer flex flex-row items-center gap-2 justify-center">
         ارسال تیکت
         <LuTickets />

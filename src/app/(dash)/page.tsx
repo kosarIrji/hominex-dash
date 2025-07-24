@@ -1,24 +1,24 @@
 "use client";
-import { RootState } from "../redux/store";
+import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { TbRouteAltRight } from "react-icons/tb";
 import dynamic from "next/dynamic";
 
 // main routes
-const Main = dynamic(() => import("../components/paths/Main"), {
-  loading: () => "loading ...",
+const Main = dynamic(() => import("../../components/paths/Main"), {
+  loading: () => "بارگذاری ...",
 });
-const Tickets = dynamic(() => import("../components/paths/Tickets"), {
-  loading: () => "loading ...",
+const Tickets = dynamic(() => import("../../components/paths/Tickets"), {
+  loading: () => "بارگذاری ...",
 });
-const Management = dynamic(() => import("../components/paths/Management"), {
-  loading: () => "loading ...",
+const Management = dynamic(() => import("../../components/paths/Management"), {
+  loading: () => "بارگذاری ...",
 });
-const Liked = dynamic(() => import("../components/paths/Liked"), {
-  loading: () => "loading ...",
+const Liked = dynamic(() => import("../../components/paths/Liked"), {
+  loading: () => "بارگذاری ...",
 });
-const Account = dynamic(() => import("../components/paths/Account"), {
-  loading: () => "loading ...",
+const Account = dynamic(() => import("../../components/paths/Account"), {
+  loading: () => "بارگذاری ...",
 });
 
 export default function page() {

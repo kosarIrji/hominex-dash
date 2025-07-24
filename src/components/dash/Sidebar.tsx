@@ -10,9 +10,9 @@ import { RootState } from "@/redux/store";
 import { AppDispatch } from "@/redux/store";
 import Ticket from "./Ticket";
 import { Routes } from "@/config/Routes";
-import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { switchRoute } from "@/redux/Slices/routeSwitch";
+import { toggleSidebar } from "@/redux/Slices/sidebar";
 
 export default function Sidebar() {
   const Sidebar = useSelector((state: RootState) => state.sidebarSlice.value);
@@ -37,7 +37,10 @@ export default function Sidebar() {
         {Routes.map((item, i) => (
           <li
             key={i}
-            onClick={() => dispatch(switchRoute(item.path))}
+            onClick={() => {
+              dispatch(toggleSidebar(false));
+              dispatch(switchRoute(item.path));
+            }}
             className={`${
               item.path === route &&
               "bg-gray-800 text-white rounded-md ring-4 outline-none ring-gray-300"
