@@ -47,11 +47,11 @@ export default function Nav() {
 
         <button
           type="button"
+          onClick={() => setToggleMessages((prev) => !prev)}
           className="relative inline-flex items-center p-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
           <svg
             className=" w-4 h-4"
             aria-hidden="true"
-            onClick={() => setToggleMessages((prev) => !prev)}
             xmlns="http://www.w3.org/2000/svg"
             fill="currentColor"
             viewBox="0 0 20 16">

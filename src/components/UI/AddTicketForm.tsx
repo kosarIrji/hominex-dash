@@ -22,10 +22,27 @@ export default function AddTicketForm() {
   };
 
   return (
-    <div className="flex flex-row gap-5 justify-center">
-      <form
-        onSubmit={handleSubmit}
-        className="w-1/2 p-6 bg-white shadow-md rounded-2xl space-y-6">
+    <div className="flex flex-col mt-5  md:flex-row gap-5 justify-center">
+      {/* instruction section */}
+
+      <div className="bg-blue-50  p-6 rounded-xl shadow-md text-gray-800 md:w-1/2 w-full">
+        <h2 className="text-xl font-bold mb-4">📋 راهنمای ارسال تیکت</h2>
+        <p className="mb-4">
+          برای دریافت پشتیبانی بهتر، لطفاً اطلاعات مربوط به درخواست خود را
+          به‌صورت دقیق وارد کنید. 📝
+        </p>
+        <p className="mb-4">
+          مواردی مثل عنوان مناسب، نوع درخواست، و میزان فوریت به ما کمک می‌کنن
+          سریع‌تر و بهتر راهنمایی‌تون کنیم. 🔍
+        </p>
+        <p className="text-sm text-gray-600 mt-6">
+          ⏰ معمولا پاسخ‌دهی بین <strong>۱ تا ۴ ساعت</strong> طول می‌کشه. از
+          صبوری‌تون ممنونیم! 🙏
+        </p>
+      </div>
+
+      {/* sending form */}
+      <form onSubmit={handleSubmit} className="md:w-1/2 w-full px-6 space-y-6">
         <div>
           <label className="block mb-1 font-medium">عنوان تیکت</label>
           <input
@@ -81,23 +98,6 @@ export default function AddTicketForm() {
           ثبت درخواست
         </button>
       </form>
-      {/* instruction section */}
-
-      <div className="bg-blue-50  p-6 rounded-xl shadow-md text-gray-800 max-w-sm w-1/2">
-        <h2 className="text-xl font-bold mb-4">📋 راهنمای ارسال تیکت</h2>
-        <p className="mb-4">
-          برای دریافت پشتیبانی بهتر، لطفاً اطلاعات مربوط به درخواست خود را
-          به‌صورت دقیق وارد کنید. 📝
-        </p>
-        <p className="mb-4">
-          مواردی مثل عنوان مناسب، نوع درخواست، و میزان فوریت به ما کمک می‌کنن
-          سریع‌تر و بهتر راهنمایی‌تون کنیم. 🔍
-        </p>
-        <p className="text-sm text-gray-600 mt-6">
-          ⏰ معمولا پاسخ‌دهی بین <strong>۱ تا ۴ ساعت</strong> طول می‌کشه. از
-          صبوری‌تون ممنونیم! 🙏
-        </p>
-      </div>
     </div>
   );
 }

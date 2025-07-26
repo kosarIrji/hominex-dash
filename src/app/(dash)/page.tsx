@@ -24,14 +24,14 @@ const Account = dynamic(() => import("../../components/paths/Account"), {
 export default function page() {
   const route = useSelector((state: RootState) => state.routeSwitch.route);
   return (
-    <div dir="ltr" className="p-5">
+    <div dir="ltr" className="px-5 py-3">
       <span className="text-[12px] flex flex-row items-center gap-2">
         <TbRouteAltRight className="text-[15px]" />{" "}
         <span className="text-gray-500">Dashboard /</span>
         {route === "dashboard" ? "" : route}
       </span>
       <div
-        className="bg-[var(--background)] my-5 shadow-2xl rounded-md p-5 overflow-x-hidden overflow-y-auto]"
+        className="bg-[var(--background)] my-1 shadow-2xl rounded-md p-5 overflow-x-hidden overflow-y-auto]"
         style={{ height: "calc(100vh - 150px)" }}>
         {route === "dashboard" && <Main />}
         {route === "ticket" && <Tickets />}

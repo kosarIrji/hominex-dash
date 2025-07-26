@@ -3,7 +3,7 @@ import "../globals.css";
 import Wrapper from "@/components/Wrapper";
 import Nav from "@/components/dash/Nav";
 import Sidebar from "@/components/dash/Sidebar";
-
+import Socials from "@/components/UI/Socials";
 export const metadata: Metadata = {
   title: "هومینکس | داشبورد",
   description: "صفحه داشبورد شرکت هومینکس",
@@ -22,6 +22,7 @@ export default function RootLayout({
           <Sidebar />
           {children}
         </Wrapper>
+        <Socials />
       </body>
     </html>
   );
