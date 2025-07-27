@@ -4,6 +4,9 @@ import Table from "../UI/Table";
 import { LuTickets } from "react-icons/lu";
 import { useState } from "react";
 import AddTicketForm from "../UI/AddTicketForm";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store";
+
 export default function Tickets() {
   const [toggleAddNew, setToggleAddNew] = useState<boolean>(false);
   return (

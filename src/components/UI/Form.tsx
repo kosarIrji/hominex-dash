@@ -95,6 +95,16 @@ interface FormData {
 }
 
 export default function SubmitPropertyPage() {
+  // Utility to format numbers with commas
+  function formatNumberWithCommas(value: string): string {
+    // Remove non-digit characters except dot
+    const num = value.replace(/[^\d.]/g, "");
+    if (!num) return "";
+    // Split integer and decimal
+    const [integer, decimal] = num.split(".");
+    const formattedInt = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return decimal !== undefined ? `${formattedInt}.${decimal}` : formattedInt;
+  }
   const commercialAmenitiesOptions = [
     { value: "storage", label: "انبار" },
     { value: "balcony", label: "بالکن" },
@@ -148,7 +158,28 @@ export default function SubmitPropertyPage() {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    // List of fields that should be formatted
+    const digitFields = [
+      "totalPrice",
+      "depositPrice",
+      "rentPrice",
+      "landArea",
+      "builtArea",
+      "shopFrontage",
+      "shopFloorArea",
+      "balconyArea",
+      "landWidth",
+      "totalUnits",
+      "unit",
+      "floor",
+      "totalFloors",
+      "bathroomCount",
+    ];
+    if (digitFields.includes(name)) {
+      setFormData({ ...formData, [name]: formatNumberWithCommas(value) });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleCheckboxChange = (
@@ -740,7 +771,7 @@ export default function SubmitPropertyPage() {
                   type="text"
                   value={formData.shopFloorArea || ""}
                   onChange={handleInputChange}
-                  className="w-full text-right p-2"
+                  className="w-full text-right p-2 border rounded-md"
                   placeholder="مثال: 50"
                 />
               </div>

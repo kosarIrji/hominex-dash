@@ -153,7 +153,7 @@ const MapComponent = ({ mapSelection, setMapSelection }: IMap) => {
         }
       }}
       ref={mapRef}>
-      <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+      <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
       {geoData && (
         <GeoJSON
           data={geoData}
