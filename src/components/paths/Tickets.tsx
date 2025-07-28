@@ -13,7 +13,7 @@ export default function Tickets() {
     <div dir="rtl">
       <div className="flex flex-row items-center justify-between">
         <span className="font-bold text-xl text-gray-600 flex flex-row-reverse justify-center items-center">
-          تیکت ها <LuTickets className="w-5 h-5 mx-2" />
+          تیکت ها <LuTickets className="w-7 h-7 mx-2" />
         </span>
         <button
           type="button"

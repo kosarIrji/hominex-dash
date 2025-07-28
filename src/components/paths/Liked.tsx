@@ -123,7 +123,7 @@ export default function Liked() {
     <div dir="rtl" className="m-3">
       <div className="flex flex-row items-center justify-between">
         <span className="font-bold text-xl text-gray-600 flex flex-row-reverse justify-center items-center">
-          آگهی مورد علاقه <BiLike className="w-5 h-5 mx-2" />
+          آگهی مورد علاقه <BiLike className="w-7 h-7 mx-2" />
         </span>
       </div>
       <LikedProperty

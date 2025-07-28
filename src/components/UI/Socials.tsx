@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function Socials() {
   return (
-    <div className="flex flex-row-reverse sm:justify-between sm:px-5 mb-5 justify-center items-center w-full">
+    <div className="flex flex-row-reverse sm:justify-between sm:px-5 mb-5  justify-center items-center w-full">
       <span className="shadow-2xl shadow-black hidden sm:block">
         توسعه با 💪 توسط تیم هومینکس
       </span>

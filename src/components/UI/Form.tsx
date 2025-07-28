@@ -1,7 +1,9 @@
 "use client";
-
 import { useState } from "react";
 import MapComponent from "./map";
+import axios from "axios";
+import Image from "next/image";
+import { alt } from "joi";
 
 interface FormData {
   propertyType:
@@ -140,7 +142,7 @@ export default function SubmitPropertyPage() {
     { value: "central_vacuum", label: "جارو مرکزی" },
     { value: "bms", label: "BMS" },
   ];
-  // const { values } = useSelector(selectAuth);
+
   const [formData, setFormData] = useState<FormData>({
     propertyType: "residential",
     adTitle: "",
@@ -219,7 +221,6 @@ export default function SubmitPropertyPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg font-morabba">
-      <h1 className="text-2xl font-bold mb-6 text-center">فرم ثبت آگهی ملک</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Property Type */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
