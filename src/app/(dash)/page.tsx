@@ -3,23 +3,36 @@ import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { TbRouteAltRight } from "react-icons/tb";
 import dynamic from "next/dynamic";
+import LoadingSpinner from "@/components/UI/LoadingSpinner";
 
 // main routes
 const Main = dynamic(() => import("../../components/paths/Main"), {
-  loading: () => "بارگذاری ...",
+  loading: () => <LoadingSpinner />,
 });
 const Tickets = dynamic(() => import("../../components/paths/Tickets"), {
-  loading: () => "بارگذاری ...",
+  loading: () => <LoadingSpinner />,
 });
 const Management = dynamic(() => import("../../components/paths/Management"), {
-  loading: () => "بارگذاری ...",
+  loading: () => <LoadingSpinner />,
 });
 const Liked = dynamic(() => import("../../components/paths/Liked"), {
-  loading: () => "بارگذاری ...",
+  loading: () => <LoadingSpinner />,
 });
 const Account = dynamic(() => import("../../components/paths/Account"), {
-  loading: () => "بارگذاری ...",
+  loading: () => <LoadingSpinner />,
 });
+const ConsultationRequests = dynamic(
+  () => import("../../components/paths/ConsultationRequests"),
+  {
+    loading: () => <LoadingSpinner />,
+  }
+);
+const UsersManagement = dynamic(
+  () => import("../../components/paths/UsersManagement"),
+  {
+    loading: () => <LoadingSpinner />,
+  }
+);
 
 export default function page() {
   const route = useSelector((state: RootState) => state.routeSwitch.route);
@@ -38,6 +51,8 @@ export default function page() {
         {route === "management" && <Management />}
         {route === "liked" && <Liked />}
         {route === "account" && <Account />}
+        {route === "UsersManagement" && <UsersManagement />}
+        {route === "consultation" && <ConsultationRequests />}
       </div>
     </div>
   );

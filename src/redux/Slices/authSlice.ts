@@ -15,11 +15,11 @@ interface IState {
 // Define the initial state using that type
 const initialState: IState = {
   client: {
-    fullname: "Reza Kamali",
-    email: "rezakamali008@gmail.com",
-    password: "@Root404",
-    phone: "09931939362",
-    OTP: 435856,
+    fullname: "",
+    email: "",
+    password: "",
+    phone: "",
+    OTP: 0,
   },
   toggleAuthPanel: false,
 };

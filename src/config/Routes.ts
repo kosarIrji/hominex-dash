@@ -15,4 +15,12 @@ export const Routes = [
     title: "آگهی مورد علاقه",
     path: "liked",
   },
+  {
+    title: "مدیریت کاربران",
+    path: "UsersManagement",
+  },
+  {
+    title: "درخواست مشاوره",
+    path: "consultation",
+  },
 ];
