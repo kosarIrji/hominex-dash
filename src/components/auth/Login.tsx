@@ -9,9 +9,10 @@ import { AppDispatch } from "@/redux/store";
 import { toggleAuth } from "@/redux/Slices/authSlice";
 import { useState } from "react";
 import { loginFormSchema } from "@/config/JoiSchema";
-import { errorToast } from "@/config/Toasts";
+import { errorToast, successToast } from "@/config/Toasts";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import axios from "axios";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
@@ -20,19 +21,37 @@ export default function Login() {
   const [password, SetPassword] = useState<string>("");
 
   // handle form submition
-  const handleFormSubmition = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleFormSubmition = async (e: React.FormEvent) => {
+    try {
+      e.preventDefault();
 
-    // validate the inputs
-    const formData = { phone, password };
-    const { error, value } = loginFormSchema.validate(formData);
-    if (error) {
-      const errorMessage = error.details.map((err) => err.message).join(", ");
-      errorToast(errorMessage);
-    } else {
-      console.log(value);
+      // validate the inputs
+      const formData = { phone, password };
+      const { error, value } = loginFormSchema.validate(formData);
+      if (error) {
+        const errorMessage = error.details.map((err) => err.message).join(", ");
+        return errorToast(errorMessage);
+      }
+
+      const config = {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      };
+
+      const response = await axios.post(
+        "https://amirpeyravan.ir/api/auth/login",
+        { ...value, login_type: "password" },
+        config
+      );
+      // show the result as a message
+      successToast(response);
+      // check input validation then send the data
+    } catch (e) {
+      errorToast(e);
     }
-    // check input validation then send the data
   };
 
   return (
