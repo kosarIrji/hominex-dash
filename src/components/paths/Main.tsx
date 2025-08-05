@@ -6,8 +6,18 @@ import { GoGear } from "react-icons/go";
 import { LuCalendarClock } from "react-icons/lu";
 import { MdOutlineWavingHand } from "react-icons/md";
 import SpotlightCard from "../../../blocks/Components/SpotlightCard/SpotlightCard";
+import { useSelector } from "react-redux";
+import { authSlice } from "@/redux/Slices/authSlice";
+import { RootState } from "@/redux/store";
 
-export default function Main() {
+type Props = {
+  session: {
+    data: any;
+  };
+};
+
+export default function Main({ session }: Props) {
+  const client = useSelector((state: RootState) => state.authSlice.client);
   const stats = [
     { label: "آگهی‌های من", value: 12, href: "/ads" },
     { label: "آگهی‌های نشان‌شده", value: 4, href: "/liked" },
@@ -24,7 +34,8 @@ export default function Main() {
     <div className="max-w-7xl mx-auto p-6 space-y-10" dir="rtl">
       <div>
         <h1 className="text-2xl font-bold text-gray-800 flex flex-row gap-3">
-          <MdOutlineWavingHand className="w-7 h-7" /> خوش آمدید رضا
+          <MdOutlineWavingHand className="w-7 h-7" /> خوش آمدید{" "}
+          {session?.data?.user.full_name}
         </h1>
         <p className="text-gray-500">
           در اینجا خلاصه‌ای از فعالیت‌های اخیر شما را می‌بینید.

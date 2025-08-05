@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { toggleSidebar } from "@/redux/Slices/sidebar";
 import Messages from "../UI/Messages";
+import { signOut } from "next-auth/react";
 
 export default function Nav() {
   //   const [toggleSidebar, setToggleSidebar] = useState(false);
@@ -19,7 +20,7 @@ export default function Nav() {
   return (
     <header className="flex flex-row-reverse justify-between items-center w-screen px-3 py-2  bg-[var(--background)] ">
       <div className="[&>*]:cursor-pointer flex flex-row-reverse items-center gap-4 ">
-        <div className="relative">
+        <div className="relative" onClick={() => signOut()}>
           <Image
             alt="تصویر پروفایل"
             width={40}

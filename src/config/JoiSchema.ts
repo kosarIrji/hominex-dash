@@ -3,7 +3,7 @@ import Joi from "joi";
 // schema for login form validation
 export const loginFormSchema = Joi.object({
   phone: Joi.string()
-    // .pattern(/^9\d{8}$/)
+    .pattern(/^0\d{10}$/)
     .required()
     .messages({
       "string.pattern.base": "شماره موبایل باید با 9 شروع شده و 10 رقم باشد",

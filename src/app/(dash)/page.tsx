@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { TbRouteAltRight } from "react-icons/tb";
 import dynamic from "next/dynamic";
 import LoadingSpinner from "@/components/UI/LoadingSpinner";
+import { useSession } from "next-auth/react";
 
 // main routes
 const Main = dynamic(() => import("../../components/paths/Main"), {
@@ -36,6 +37,8 @@ const UsersManagement = dynamic(
 
 export default function page() {
   const route = useSelector((state: RootState) => state.routeSwitch.route);
+  const session = useSession();
+
   return (
     <div dir="ltr" className="px-5 py-3">
       <span className="text-[12px] flex flex-row items-center gap-2">
@@ -46,7 +49,7 @@ export default function page() {
       <div
         className="bg-[var(--background)] my-1 shadow-2xl rounded-md p-5 overflow-x-hidden overflow-y-auto]"
         style={{ height: "calc(100vh - 150px)" }}>
-        {route === "dashboard" && <Main />}
+        {route === "dashboard" && <Main session={session} />}
         {route === "ticket" && <Tickets />}
         {route === "management" && <Management />}
         {route === "liked" && <Liked />}

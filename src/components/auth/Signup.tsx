@@ -54,7 +54,8 @@ export default function Signup() {
       if (response.ok) {
         // show the OTP box and log message
         setShowOTP(true);
-        infoToast(response.message);
+        const data = await response.json();
+        infoToast(data.message);
         // save info on redux
         dispatch(updateCLientData({ fullname, phone, password, email }));
         // switch to login page

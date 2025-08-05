@@ -2,8 +2,10 @@
 
 import React, { useState } from "react";
 import { iranProvinces } from "../../config/Provinces"; // adjust path as needed
+import { useSession } from "next-auth/react";
 
 export default function AccountInfo() {
+  const session = useSession();
   const [selectedProvince, setSelectedProvince] = useState<string>("");
   const [cities, setCities] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>("");
@@ -30,7 +32,7 @@ export default function AccountInfo() {
             <input
               id="fullname"
               type="text"
-              placeholder="علی فلاح"
+              placeholder={session?.data?.user?.full_name.toString()}
               disabled
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
             />
@@ -43,7 +45,7 @@ export default function AccountInfo() {
             <input
               id="email"
               type="email"
-              placeholder="ali@example.com"
+              placeholder={session?.data?.user?.email.toString()}
               disabled
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
             />

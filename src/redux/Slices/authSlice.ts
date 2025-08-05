@@ -3,7 +3,9 @@ import { createSlice } from "@reduxjs/toolkit";
 // Define a type for the slice state
 interface IState {
   client: {
-    fullname: string;
+    id: number;
+    full_name: string;
+    user_type: string;
     email: string;
     password: string;
     phone: string;
@@ -15,13 +17,15 @@ interface IState {
 // Define the initial state using that type
 const initialState: IState = {
   client: {
-    fullname: "",
+    id: 0,
+    full_name: "",
+    user_type: "regular",
     email: "",
     password: "",
     phone: "",
     OTP: 0,
   },
-  toggleAuthPanel: false,
+  toggleAuthPanel: true,
 };
 
 export const authSlice = createSlice({

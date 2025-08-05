@@ -12,19 +12,21 @@ import { loginFormSchema } from "@/config/JoiSchema";
 import { errorToast, successToast } from "@/config/Toasts";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import axios from "axios";
+import { updateCLientData } from "@/redux/Slices/authSlice";
+import { useSelector } from "react-redux";
+import { authSlice } from "@/redux/Slices/authSlice";
+import { RootState } from "@/redux/store";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
-
+  const client = useSelector((state: RootState) => state.authSlice.client);
   const [phone, setPhone] = useState<string>("");
   const [password, SetPassword] = useState<string>("");
-
+  const router = useRouter();
   // handle form submition
-  const handleFormSubmition = async (e: React.FormEvent) => {
+  const handleFormSubmit = async () => {
     try {
-      e.preventDefault();
-
       // validate the inputs
       const formData = { phone, password };
       const { error, value } = loginFormSchema.validate(formData);
@@ -33,22 +35,13 @@ export default function Login() {
         return errorToast(errorMessage);
       }
 
-      const config = {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-      };
-
-      const response = await axios.post(
-        "https://amirpeyravan.ir/api/auth/login",
-        { ...value, login_type: "password" },
-        config
-      );
-      // show the result as a message
-      successToast(response);
-      // check input validation then send the data
+      // sending validated request to back-end
+      await signIn("credentials", {
+        phone: phone,
+        password: password,
+        redirect: true,
+        callbackUrl: "/",
+      });
     } catch (e) {
       errorToast(e);
     }
@@ -119,7 +112,7 @@ export default function Login() {
               name="phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              maxLength={10}
+              maxLength={11}
             />
             <span className="absolute left-3 border-r-2 pr-3 font-bold text-gray-700">
               98+
@@ -149,7 +142,7 @@ export default function Login() {
         {/* enter button */}
         <div className="mt-8 flex gap-2 [&>*]:h-13">
           <button
-            onClick={(e) => handleFormSubmition(e)}
+            onClick={() => handleFormSubmit()}
             type="submit"
             className="bg-gray-700 text-white font-bold py-2 px-4 w-full rounded hover:bg-gray-600 flex justify-center items-center gap-1 hover:gap-5 transition-all cursor-pointer">
             ورود
