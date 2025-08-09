@@ -5,7 +5,11 @@ import { TbRouteAltRight } from "react-icons/tb";
 import dynamic from "next/dynamic";
 import LoadingSpinner from "@/components/UI/LoadingSpinner";
 import { useSession } from "next-auth/react";
-
+import { useEffect } from "react";
+import { Dispatch } from "@reduxjs/toolkit";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../redux/store";
+import { updateCLientData } from "@/redux/Slices/authSlice";
 // main routes
 const Main = dynamic(() => import("../../components/paths/Main"), {
   loading: () => <LoadingSpinner />,
@@ -35,9 +39,51 @@ const UsersManagement = dynamic(
   }
 );
 
+type Client = {
+  id: number;
+  phone: string;
+  email: string;
+  full_name: string;
+  user_type: string;
+  created_at: string;
+};
+
 export default function page() {
   const route = useSelector((state: RootState) => state.routeSwitch.route);
   const session = useSession();
+  const dispatch = useDispatch<AppDispatch>();
+  useEffect(() => {
+    const getData = async () => {
+      const _personal = await fetch("https://amirpeyravan.ir/api/auth/me", {
+        method: "GET", // ✅ method here
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.data?.user?.access_token}`, // ✅ custom auth header
+        },
+      });
+
+      const { data } = await _personal.json();
+      // dispatch information
+      dispatch(updateCLientData({ ...data }));
+      // ---------------------------------------------------------------
+      // get consultation requests and add to store
+      const _consultations = await fetch(
+        "https://amirpeyravan.ir/api/v1/user/consultation-requests",
+        {
+          method: "GET", // ✅ method here
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.data?.user?.access_token}`, // ✅ custom auth header
+          },
+        }
+      );
+
+      const consultations = await _consultations.json();
+      console.log(consultations);
+    };
+
+    getData();
+  }, [session]);
 
   return (
     <div dir="ltr" className="px-5 py-3">

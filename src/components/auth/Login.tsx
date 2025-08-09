@@ -12,18 +12,14 @@ import { loginFormSchema } from "@/config/JoiSchema";
 import { errorToast, successToast } from "@/config/Toasts";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { updateCLientData } from "@/redux/Slices/authSlice";
-import { useSelector } from "react-redux";
-import { authSlice } from "@/redux/Slices/authSlice";
-import { RootState } from "@/redux/store";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
-  const client = useSelector((state: RootState) => state.authSlice.client);
   const [phone, setPhone] = useState<string>("");
   const [password, SetPassword] = useState<string>("");
   const router = useRouter();
+
   // handle form submition
   const handleFormSubmit = async () => {
     try {
@@ -36,12 +32,20 @@ export default function Login() {
       }
 
       // sending validated request to back-end
-      await signIn("credentials", {
-        phone: phone,
-        password: password,
-        redirect: true,
+      const res = await signIn("credentials", {
+        phone: value.phone,
+        password: value.password,
+        redirect: false,
         callbackUrl: "/",
       });
+
+      if (res?.ok) {
+        successToast("ورود موفق");
+        console.log(res);
+      }
+      setTimeout(() => {
+        router.push(res.url || "/");
+      }, 2000);
     } catch (e) {
       errorToast(e);
     }
@@ -137,6 +141,9 @@ export default function Login() {
             value={password}
             onChange={(e) => SetPassword(e.target.value)}
             autoComplete="new-password"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleFormSubmit();
+            }}
           />
         </div>
         {/* enter button */}

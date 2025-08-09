@@ -3,11 +3,25 @@ import { RiAccountCircleLine } from "react-icons/ri";
 import AccountInfo from "../UI/AccountInfo";
 import Image from "next/image";
 import { RiEditBoxLine } from "react-icons/ri";
-
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { Indigo, Green, Yellow } from "../UI/Badges";
 export default function Account() {
+  const client = useSelector((state: RootState) => state.authSlice.client);
   return (
     <div dir="rtl" className="m-3">
       <div className="relative bg-[url('/assets/img/propertyBG.jpg')] bg-cover w-full h-[10rem] rounded-xl mb-10">
+        <div className="pt-5 pr-5">
+          <Yellow
+            value={`سطح ${
+              client.user_type === "regular"
+                ? "کاربر"
+                : client.user_type === "admin"
+                ? "ادمین"
+                : "ویراستار"
+            }`}
+          />
+        </div>
         <div className="absolute w-fit h-fit left-10 bottom-[-2rem] flex justify-center items-center overflow-hidden">
           <RiEditBoxLine className="absolute w-full h-full p-10 text-white bg-black/30 rounded-full cursor-pointer" />
           <Image

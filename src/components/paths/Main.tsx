@@ -6,10 +6,9 @@ import { GoGear } from "react-icons/go";
 import { LuCalendarClock } from "react-icons/lu";
 import { MdOutlineWavingHand } from "react-icons/md";
 import SpotlightCard from "../../../blocks/Components/SpotlightCard/SpotlightCard";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { authSlice } from "@/redux/Slices/authSlice";
 import { RootState } from "@/redux/store";
-
 type Props = {
   session: {
     data: any;
@@ -17,6 +16,7 @@ type Props = {
 };
 
 export default function Main({ session }: Props) {
+  const [stat, setStat] = useState({});
   const client = useSelector((state: RootState) => state.authSlice.client);
   const stats = [
     { label: "آگهی‌های من", value: 12, href: "/ads" },
@@ -30,12 +30,37 @@ export default function Main({ session }: Props) {
     { title: "زمین 200 متری در لواسان", date: "1403/04/10" },
   ];
 
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const response = await fetch(
+          `https://amirpeyravan.ir/api/v1/consultant/dashboard`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.data?.user?.access_token}`,
+            },
+          }
+        );
+
+        const res = await response.json();
+        // save the data on useState
+        setStat(res.data.stats);
+        console.log(res);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    getData();
+  }, [session]);
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-10" dir="rtl">
       <div>
         <h1 className="text-2xl font-bold text-gray-800 flex flex-row gap-3">
           <MdOutlineWavingHand className="w-7 h-7" /> خوش آمدید{" "}
-          {session?.data?.user.full_name}
+          {client.full_name}
         </h1>
         <p className="text-gray-500">
           در اینجا خلاصه‌ای از فعالیت‌های اخیر شما را می‌بینید.

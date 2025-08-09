@@ -1,15 +1,13 @@
 "use client";
-
 import React, { useState } from "react";
-import { iranProvinces } from "../../config/Provinces"; // adjust path as needed
-import { useSession } from "next-auth/react";
-
+import { iranProvinces } from "../../config/Provinces";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 export default function AccountInfo() {
-  const session = useSession();
   const [selectedProvince, setSelectedProvince] = useState<string>("");
   const [cities, setCities] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>("");
-
+  const client = useSelector((state: RootState) => state.authSlice.client);
   const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const province = e.target.value;
     setSelectedProvince(province);
@@ -32,7 +30,7 @@ export default function AccountInfo() {
             <input
               id="fullname"
               type="text"
-              placeholder={session?.data?.user?.full_name.toString()}
+              placeholder={client.full_name}
               disabled
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
             />
@@ -45,7 +43,7 @@ export default function AccountInfo() {
             <input
               id="email"
               type="email"
-              placeholder={session?.data?.user?.email.toString()}
+              placeholder={client.email}
               disabled
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
             />
@@ -72,8 +70,9 @@ export default function AccountInfo() {
             <input
               id="phone"
               type="tel"
-              placeholder="+98 9356541212"
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder={client.phone}
+              disabled
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
             />
           </div>
         </div>

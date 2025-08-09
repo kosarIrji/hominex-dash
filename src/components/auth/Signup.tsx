@@ -1,4 +1,4 @@
-import React from "react";
+import React, { SetStateAction, useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import BlurText from "../../../blocks/TextAnimations/BlurText/BlurText";
 import OTP from "@/components/UI/OTP";
@@ -6,63 +6,91 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { toggleAuth } from "@/redux/Slices/authSlice";
 import { signupFormSchema } from "@/config/JoiSchema";
-import { errorToast, infoToast } from "@/config/Toasts";
+import { errorToast, infoToast, successToast } from "@/config/Toasts";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { updateCLientData } from "@/redux/Slices/authSlice";
+import { Dispatch } from "react";
 
 export default function Signup() {
   const dispatch = useDispatch<AppDispatch>();
 
-  const [fullname, setFullname] = useState("");
-  const [email, setEmail] = useState("");
+  const [full_name, setFullname] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [password, SetPassword] = useState<string>("");
+  const [OTP, setOTP] = useState<string>("");
   //-----------
 
   const [showOTP, setShowOTP] = useState<boolean>(false);
   const [error, setError] = useState<string>();
   // handle form submition
+  const [otpCode, setOtpCode] = useState<string>("");
+
   const handleFormSubmition = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
 
-      // validate the inputs
-      const formData = { fullname, phone, password, email };
-      const { error, value } = signupFormSchema.validate(formData);
-      if (error) {
-        const errorMessage = error.details.map((err) => err.message).join(", ");
+      const formData = {
+        full_name,
+        phone: "0" + phone,
+        password,
+        email,
+      };
+      const { error: validationError, value } =
+        signupFormSchema.validate(formData);
+      if (validationError) {
+        const errorMessage = validationError.details
+          .map((err) => err.message)
+          .join(", ");
         return errorToast(errorMessage);
       }
-      console.log(value);
-      // send validated data to back-end
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/register`,
-        {
+
+      const response = await fetch(`/api/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(value),
+        credentials: "include",
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        return errorToast(data.message || "ثبت‌ نام ناموفق بود.");
+      }
+      console.log(data);
+      setShowOTP(true);
+      infoToast(data.message);
+      dispatch(updateCLientData({ full_name, phone, password, email }));
+    } catch (err) {
+      errorToast("خطایی رخ داد ، مجدد تلاش نمایید .");
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (otpCode.length !== 6) return; // only send if complete
+    const sendOTP = async () => {
+      try {
+        const res = await fetch(`/api/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            phone: "0" + phone,
-            full_name: fullname,
-            email,
-            password,
-          }),
-          credentials: "include", // Ensure cookies are sent/received
-        }
-      );
+          body: JSON.stringify({ phone, code: otpCode }),
+          credentials: "include",
+        });
 
-      if (response.ok) {
-        // show the OTP box and log message
-        setShowOTP(true);
-        const data = await response.json();
-        infoToast(data.message);
-        // save info on redux
-        dispatch(updateCLientData({ fullname, phone, password, email }));
-        // switch to login page
-        dispatch(toggleAuth());
+        const data = await res.json();
+        if (res.ok) {
+          setShowOTP(false);
+          dispatch(toggleAuth());
+        } else {
+          errorToast(data.message || "OTP verification failed.");
+        }
+      } catch (err) {
+        console.error(err);
       }
-    } catch (e) {}
-  };
+    };
+    sendOTP();
+  }, [otpCode]);
 
   return (
     <>
@@ -129,7 +157,7 @@ export default function Signup() {
                 className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
                 type="text"
                 name="fullname"
-                value={fullname}
+                value={full_name}
                 onChange={(e) => setFullname(e.target.value)}
               />
             </div>

@@ -47,7 +47,9 @@ export default function ConsultationRequests() {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await fetch("https://validitycheck.sub4u.site/");
+        const response = await fetch(
+          "https://amirpeyravan.ir/api/user/consultation-requests "
+        );
         if (!response.ok) throw new Error("Failed to fetch requests");
         const data: ConsultationRequest[] = await response.json();
         setRequests(data);

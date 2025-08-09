@@ -11,16 +11,43 @@ import { AppDispatch } from "@/redux/store";
 import { toggleSidebar } from "@/redux/Slices/sidebar";
 import Messages from "../UI/Messages";
 import { signOut } from "next-auth/react";
+import { successToast } from "@/config/Toasts";
+import { RiLogoutCircleLine } from "react-icons/ri";
+import { useSession } from "next-auth/react";
 
 export default function Nav() {
   //   const [toggleSidebar, setToggleSidebar] = useState(false);
   const Sidebar = useSelector((state: RootState) => state.sidebarSlice.value);
+  const session = useSession();
   const dispatch = useDispatch<AppDispatch>();
   const [toggleMessages, setToggleMessages] = useState<boolean>(false);
+
+  const handleLogout = async () => {
+    try {
+      successToast("درحال خروج از حساب");
+      setTimeout(async () => {
+        const res = await fetch("https://amirpeyravan.ir/api/auth/logout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.data?.user?.access_token}`,
+          },
+        });
+        console.log(res);
+        signOut();
+      }, 2000);
+    } catch (e) {
+      console.log(e);
+    }
+  };
   return (
     <header className="flex flex-row-reverse justify-between items-center w-screen px-3 py-2  bg-[var(--background)] ">
-      <div className="[&>*]:cursor-pointer flex flex-row-reverse items-center gap-4 ">
-        <div className="relative" onClick={() => signOut()}>
+      <div className="[&>*]:cursor-pointer flex flex-row-reverse items-center gap-3 ">
+        <RiLogoutCircleLine
+          onClick={() => handleLogout()}
+          className="w-5 h-5  text text-red-500 transition-colors rounded-md"
+        />
+        <div className="relative">
           <Image
             alt="تصویر پروفایل"
             width={40}
@@ -28,7 +55,6 @@ export default function Nav() {
             src={"/assets/img/profile.png"}
             className="rounded-full border-3 border-blue-500"
           />
-
           <svg
             className="w-4 h-4 absolute bottom-[-0.2rem] text-blue-600"
             aria-hidden="true"

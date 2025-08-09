@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { Dispatch, SetStateAction } from "react";
 type _OTP = {
-  setShowOTP: Dispatch<SetStateAction<boolean>>;
+  setShowOTP: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export default function OTP({ setShowOTP }: _OTP) {
   const client = useSelector((state: RootState) => state.authSlice.client);

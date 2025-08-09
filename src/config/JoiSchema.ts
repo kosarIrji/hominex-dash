@@ -19,14 +19,14 @@ export const loginFormSchema = Joi.object({
 
 // schema for signup form validation
 export const signupFormSchema = Joi.object({
-  fullname: Joi.string().min(3).max(50).required().messages({
+  full_name: Joi.string().min(3).max(50).required().messages({
     "string.empty": "نام و نام خانوادگی الزامی است",
     "string.min": "نام باید حداقل ۳ کاراکتر باشد",
     "string.max": "نام نمی‌تواند بیشتر از ۵۰ کاراکتر باشد",
   }),
 
   phone: Joi.string()
-    .pattern(/^9\d{9}$/)
+    .pattern(/^0\d{10}$/)
     .required()
     .messages({
       "string.pattern.base": "شماره موبایل باید با 9 شروع شده و 10 رقم باشد",
