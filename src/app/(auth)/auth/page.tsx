@@ -10,7 +10,7 @@ export default function page() {
     (state: RootState) => state.authSlice.toggleAuthPanel
   );
   return (
-    <div className="relative py-16 h-[100vh] z-10">
+    <div className="flex justify-center items-center py-16 h-[100vh] z-10">
       {toggleAuth ? <Login /> : <Signup />}
     </div>
   );

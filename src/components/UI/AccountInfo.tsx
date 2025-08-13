@@ -1,20 +1,39 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { iranProvinces } from "../../config/Provinces";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+
 export default function AccountInfo() {
+  const client = useSelector((state: RootState) => state.authSlice.client);
+
   const [selectedProvince, setSelectedProvince] = useState<string>("");
   const [cities, setCities] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>("");
-  const client = useSelector((state: RootState) => state.authSlice.client);
+
   const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const province = e.target.value;
     setSelectedProvince(province);
+
     const found = iranProvinces.find((item) => item.استان === province);
     setCities(found ? found.شهرها : []);
     setSelectedCity("");
   };
+
+  useEffect(() => {
+    if (client?.residence_province) {
+      setSelectedProvince(client.residence_province);
+
+      const found = iranProvinces.find(
+        (item) => item.استان === client.residence_province
+      );
+      setCities(found ? found.شهرها : []);
+
+      if (client?.residence_city) {
+        setSelectedCity(client.residence_city);
+      }
+    }
+  }, [client]);
 
   return (
     <div className="p-4" dir="rtl">
@@ -30,7 +49,7 @@ export default function AccountInfo() {
             <input
               id="fullname"
               type="text"
-              placeholder={client.full_name}
+              placeholder={client?.full_name || ""}
               disabled
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
             />
@@ -43,7 +62,7 @@ export default function AccountInfo() {
             <input
               id="email"
               type="email"
-              placeholder={client.email}
+              placeholder={client?.email || ""}
               disabled
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
             />
@@ -70,7 +89,40 @@ export default function AccountInfo() {
             <input
               id="phone"
               type="tel"
-              placeholder={client.phone}
+              placeholder={client?.phone || ""}
+              disabled
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
+            />
+          </div>
+        </div>
+
+        {/* Marital Status & Job Title */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <label
+              htmlFor="maritalStatus"
+              className="font-medium text-gray-700 mb-1">
+              وضعیت تاهل
+            </label>
+            <input
+              id="maritalStatus"
+              type="text"
+              placeholder={client?.marital_status || ""}
+              disabled
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <label
+              htmlFor="jobTitle"
+              className="font-medium text-gray-700 mb-1">
+              عنوان شغلی
+            </label>
+            <input
+              id="jobTitle"
+              type="text"
+              placeholder={client?.job_title || ""}
               disabled
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
             />

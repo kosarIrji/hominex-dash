@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { IoSettingsOutline } from "react-icons/io5";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
 import { useSelector } from "react-redux";
@@ -14,14 +13,20 @@ import { signOut } from "next-auth/react";
 import { successToast } from "@/config/Toasts";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { useSession } from "next-auth/react";
+import { concatWithPlus } from "@/lib/concatWithPlus";
 
 export default function Nav() {
   //   const [toggleSidebar, setToggleSidebar] = useState(false);
   const Sidebar = useSelector((state: RootState) => state.sidebarSlice.value);
+  const client = useSelector((state: RootState) => state.authSlice.client);
   const session = useSession();
   const dispatch = useDispatch<AppDispatch>();
   const [toggleMessages, setToggleMessages] = useState<boolean>(false);
+  const { notifications } = useSelector(
+    (state: RootState) => state.Notification
+  );
 
+  //signout the user
   const handleLogout = async () => {
     try {
       successToast("درحال خروج از حساب");
@@ -52,7 +57,7 @@ export default function Nav() {
             alt="تصویر پروفایل"
             width={40}
             height={40}
-            src={"/assets/img/profile.png"}
+            src={client.profile_picture + concatWithPlus(client.full_name)}
             className="rounded-full border-3 border-blue-500"
           />
           <svg
@@ -89,7 +94,7 @@ export default function Nav() {
           {toggleMessages && <Messages />}
 
           <div className="absolute text-[10px] inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -end-2 ">
-            20
+            {notifications.length ? notifications.length : 0}
           </div>
         </button>
 

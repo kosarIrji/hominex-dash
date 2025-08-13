@@ -1,39 +1,109 @@
-import { createSlice } from "@reduxjs/toolkit";
+// authSlice.ts
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { url_v1 } from "@/config/urls";
+import { signOut } from "next-auth/react";
 
 // Define a type for the slice state
-interface IState {
-  client: {
-    id: number;
-    full_name: string;
-    user_type: string;
-    email: string;
-    password: string;
-    phone: string;
-    OTP: number;
+interface IClient {
+  id: number;
+  phone: string;
+  email: string;
+  password: string;
+  full_name: string;
+  user_type: string;
+  profile_picture: string;
+  is_active: boolean;
+  phone_verified_at: string;
+  created_at: string;
+  age: number;
+  marital_status: string;
+  job_title: string;
+  residence_province: string;
+  residence_city: string;
+  consultant: null;
+  stats: {
+    created_properties_count: number;
+    approved_properties_count: number;
+    pending_properties_count: number;
+    favorites_count: number;
+    unread_notifications_count: number;
   };
-  toggleAuthPanel: boolean;
 }
 
-// Define the initial state using that type
+interface IState {
+  client: IClient;
+  toggleAuthPanel: boolean;
+  loading: boolean;
+  error: string | null;
+}
+
+// Initial state
 const initialState: IState = {
   client: {
     id: 0,
-    full_name: "",
-    user_type: "regular",
+    phone: "",
     email: "",
     password: "",
-    phone: "",
-    OTP: 0,
+    full_name: "",
+    user_type: "",
+    profile_picture: "https://avatar.iran.liara.run/username?username=",
+    is_active: false,
+    phone_verified_at: "",
+    created_at: "",
+    age: 0,
+    marital_status: "",
+    job_title: "",
+    residence_province: "",
+    residence_city: "",
+    consultant: null,
+    stats: {
+      created_properties_count: 0,
+      approved_properties_count: 0,
+      pending_properties_count: 0,
+      favorites_count: 0,
+      unread_notifications_count: 0,
+    },
   },
   toggleAuthPanel: true,
+  loading: false,
+  error: null,
 };
+
+// ✅ Thunk to fetch profile data
+export const fetchClientProfile = createAsyncThunk(
+  "auth/fetchClientProfile",
+  async (token: string, { rejectWithValue }) => {
+    try {
+      const res = await fetch(url_v1("/user/profile"), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.status === 401) {
+        signOut();
+        return rejectWithValue("Unauthorized");
+      }
+
+      if (!res.ok) {
+        return rejectWithValue("خطا دریافت اطلاعات");
+      }
+
+      const { data } = await res.json();
+      return data; // This will go into fulfilled payload
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Request failed");
+    }
+  }
+);
 
 export const authSlice = createSlice({
   name: "Auth",
-  // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
-    updateCLientData: (state, action) => {
+    updateCLientData: (state, action: PayloadAction<Partial<IClient>>) => {
       state.client = {
         ...state.client,
         ...action.payload,
@@ -42,6 +112,21 @@ export const authSlice = createSlice({
     toggleAuth: (state) => {
       state.toggleAuthPanel = !state.toggleAuthPanel;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchClientProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchClientProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.client = { ...state.client, ...action.payload };
+      })
+      .addCase(fetchClientProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 

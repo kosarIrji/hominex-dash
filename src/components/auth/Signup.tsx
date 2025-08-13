@@ -1,4 +1,4 @@
-import React, { SetStateAction, useEffect } from "react";
+import React, { useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import BlurText from "../../../blocks/TextAnimations/BlurText/BlurText";
 import OTP from "@/components/UI/OTP";
@@ -6,11 +6,12 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { toggleAuth } from "@/redux/Slices/authSlice";
 import { signupFormSchema } from "@/config/JoiSchema";
-import { errorToast, infoToast, successToast } from "@/config/Toasts";
+import { errorToast, infoToast } from "@/config/Toasts";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { updateCLientData } from "@/redux/Slices/authSlice";
-import { Dispatch } from "react";
+import { IoEyeOutline } from "react-icons/io5";
+import { IoEyeOffOutline } from "react-icons/io5";
 
 export default function Signup() {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,11 +20,12 @@ export default function Signup() {
   const [email, setEmail] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [password, SetPassword] = useState<string>("");
+  const [passwordType, setPasswordType] = useState<string>("password");
   const [OTP, setOTP] = useState<string>("");
   //-----------
 
   const [showOTP, setShowOTP] = useState<boolean>(false);
-  const [error, setError] = useState<string>();
+
   // handle form submition
   const [otpCode, setOtpCode] = useState<string>("");
 
@@ -94,7 +96,7 @@ export default function Signup() {
 
   return (
     <>
-      <div className="flex mt-10 bg-white/40 backdrop-blur-2xl rounded-lg shadow-lg overflow-hidden mx-auto max-w-sm lg:max-w-4xl">
+      <div className="flex mt-10 bg-white/40 backdrop-blur-2xl rounded-lg shadow-lg overflow-hidden mx-auto w-4xl max-w-sm lg:max-w-4xl">
         <div
           className="hidden lg:block lg:w-1/2 bg-cover"
           style={{
@@ -210,14 +212,27 @@ export default function Signup() {
                 رمز را فراموش کرده اید ؟
               </a> */}
             </div>
-            <input
-              className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
-              type="password"
-              name="password"
-              value={password}
-              onChange={(e) => SetPassword(e.target.value)}
-              autoComplete="new-password"
-            />
+            <div className="relative">
+              <input
+                className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
+                type={passwordType}
+                name="password"
+                value={password}
+                onChange={(e) => SetPassword(e.target.value)}
+                autoComplete="new-password"
+              />
+              {passwordType === "text" ? (
+                <IoEyeOffOutline
+                  onClick={() => setPasswordType("password")}
+                  className="absolute left-3 w-5 h-5 bottom-[0.7rem] cursor-pointer"
+                />
+              ) : (
+                <IoEyeOutline
+                  onClick={() => setPasswordType("text")}
+                  className="absolute left-3 w-5 h-5 bottom-[0.7rem] cursor-pointer"
+                />
+              )}
+            </div>
           </div>
           {/* enter button */}
           <div className="mt-8 [&>*]:h-13">

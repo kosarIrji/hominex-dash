@@ -2,13 +2,10 @@ import Joi from "joi";
 
 // schema for login form validation
 export const loginFormSchema = Joi.object({
-  phone: Joi.string()
-    .pattern(/^0\d{10}$/)
-    .required()
-    .messages({
-      "string.pattern.base": "شماره موبایل باید با 9 شروع شده و 10 رقم باشد",
-      "string.empty": "شماره موبایل الزامی است",
-    }),
+  phone: Joi.string().required().messages({
+    "string.pattern.base": "شماره موبایل باید با 9 شروع شده و 10 رقم باشد",
+    "string.empty": "شماره موبایل الزامی است",
+  }),
 
   password: Joi.string().min(6).max(32).required().messages({
     "string.min": "رمز عبور باید حداقل 6 کاراکتر باشد",
@@ -25,13 +22,10 @@ export const signupFormSchema = Joi.object({
     "string.max": "نام نمی‌تواند بیشتر از ۵۰ کاراکتر باشد",
   }),
 
-  phone: Joi.string()
-    .pattern(/^0\d{10}$/)
-    .required()
-    .messages({
-      "string.pattern.base": "شماره موبایل باید با 9 شروع شده و 10 رقم باشد",
-      "string.empty": "شماره موبایل الزامی است",
-    }),
+  phone: Joi.string().required().messages({
+    "string.pattern.base": "شماره موبایل باید با 9 شروع شده و 10 رقم باشد",
+    "string.empty": "شماره موبایل الزامی است",
+  }),
 
   email: Joi.string()
     .email({ tlds: { allow: false } })

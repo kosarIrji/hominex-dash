@@ -1,8 +1,14 @@
-import NextAuth, { User } from "next-auth";
-import { AdapterUser } from "next-auth/adapters";
+import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { AdapterUser } from "next-auth/adapters";
 
-// Define your NextAuth configuration inline
+interface AuthUser extends AdapterUser {
+  phone: string;
+  full_name: string;
+  user_type: string;
+  access_token: string;
+}
+
 const { auth, handlers } = NextAuth({
   providers: [
     Credentials({
@@ -11,38 +17,24 @@ const { auth, handlers } = NextAuth({
         phone: { label: "Phone", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials): Promise<AuthUser | null> {
         try {
-          const response = await fetch(
-            "https://amirpeyravan.ir/api/auth/login",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                phone: credentials?.phone,
-                password: credentials?.password,
-                login_type: "password",
-              }),
-            }
-          );
+          const res = await fetch("https://amirpeyravan.ir/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              phone: credentials?.phone,
+              password: credentials?.password,
+              login_type: "password",
+            }),
+          });
 
-          const result = await response.json();
+          const result = await res.json();
 
-          if (!response.ok || !result.success) {
-            return null;
-          }
+          if (!res.ok || !result.success) return null;
 
           const { access_token, user } = result.data;
-
-          return {
-            id: user.id,
-            phone: user.phone,
-            full_name: user.full_name,
-            user_type: user.user_type,
-            access_token,
-          };
+          return { ...user, access_token };
         } catch (error) {
           console.error("Authorize error:", error);
           return null;
@@ -53,20 +45,18 @@ const { auth, handlers } = NextAuth({
   pages: {
     signIn: "/auth",
   },
-  session: {
-    strategy: "jwt",
-  },
+  session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        const customUser = user as AdapterUser & { access_token: string };
-        token.user = customUser;
-        token.auth_token = customUser.access_token;
+        token.access_token = (user as AuthUser).access_token;
+        token.user = user;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user = token.user as AdapterUser & User;
+      session.user = token.user as AuthUser;
+      session.access_token = token.access_token as string;
       return session;
     },
   },

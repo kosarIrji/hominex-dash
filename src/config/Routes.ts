@@ -9,7 +9,7 @@ export const Routes = [
   },
   {
     title: "مدیریت آگهی",
-    path: "management",
+    path: "properties",
   },
   {
     title: "آگهی مورد علاقه",

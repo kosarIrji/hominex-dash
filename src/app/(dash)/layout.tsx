@@ -5,6 +5,7 @@ import Nav from "@/components/dash/Nav";
 import Sidebar from "@/components/dash/Sidebar";
 import Socials from "@/components/UI/Socials";
 import Session from "@/components/Session";
+import FetchLayer from "@/components/FetchLayer";
 
 export const metadata: Metadata = {
   title: "هومینکس | داشبورد",
@@ -19,9 +20,11 @@ export default function RootLayout({
     <>
       <Wrapper>
         <Session>
-          <Nav />
-          <Sidebar />
-          {children}
+          <FetchLayer>
+            <Nav />
+            <Sidebar />
+            {children}
+          </FetchLayer>
         </Session>
       </Wrapper>
       <Socials />

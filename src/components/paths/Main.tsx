@@ -6,22 +6,31 @@ import { GoGear } from "react-icons/go";
 import { LuCalendarClock } from "react-icons/lu";
 import { MdOutlineWavingHand } from "react-icons/md";
 import SpotlightCard from "../../../blocks/Components/SpotlightCard/SpotlightCard";
-import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-type Props = {
-  session: {
-    data: any;
-  };
-};
+import { AppDispatch, RootState } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { switchRoute } from "@/redux/Slices/routeSwitch";
 
-export default function Main({ session }: Props) {
-  const [stat, setStat] = useState({});
-  const client = useSelector((state: RootState) => state.authSlice.client);
+export default function Main() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { client } = useSelector((state: RootState) => state.authSlice);
+
   const stats = [
-    { label: "آگهی‌های من", value: 12, href: "/ads" },
-    { label: "آگهی‌های نشان‌شده", value: 4, href: "/liked" },
-    { label: "بازدید امروز", value: 187, href: "/ads" },
+    {
+      label: "آگهی‌های ایجاد شده",
+      value: client.stats.created_properties_count,
+      href: "/",
+    },
+    {
+      label: "آگهی‌های نشان‌شده",
+      value: client.stats.favorites_count,
+      href: "/",
+    },
+    {
+      label: "آگهی های تایید شده",
+      value: client.stats.approved_properties_count,
+      href: "/ads",
+    },
     { label: "تکمیل پروفایل", value: "80%", href: "/profile" },
   ];
 
@@ -29,32 +38,7 @@ export default function Main({ session }: Props) {
     { title: "آپارتمان 80 متری نوساز", date: "1403/04/12" },
     { title: "زمین 200 متری در لواسان", date: "1403/04/10" },
   ];
-
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const response = await fetch(
-          `https://amirpeyravan.ir/api/v1/consultant/dashboard`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.data?.user?.access_token}`,
-            },
-          }
-        );
-
-        const res = await response.json();
-        // save the data on useState
-        setStat(res.data.stats);
-        console.log(res);
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    getData();
-  }, [session]);
-
+  console.log(client);
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-10" dir="rtl">
       <div>
@@ -72,7 +56,7 @@ export default function Main({ session }: Props) {
         {stats.map((stat, i) => (
           <SpotlightCard
             key={i}
-            className="custom-spotlight-card bg-white"
+            className="custom-spotlight-card bg-white border-none shadow-md"
             spotlightColor="rgba(0, 229, 255, 0.5)">
             <Link
               href={stat.href}
@@ -103,16 +87,16 @@ export default function Main({ session }: Props) {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link
-          href="/ads/new"
-          className="bg-blue-600 text-white py-4 px-6 rounded-xl text-center hover:bg-blue-700 transition flex flex-row justify-center items-center gap-3">
+        <button
+          onClick={() => dispatch(switchRoute("management"))}
+          className="bg-blue-600 cursor-pointer text-white py-4 px-6 rounded-xl text-center hover:bg-blue-700 transition flex flex-row justify-center items-center gap-3">
           <CiCirclePlus /> ثبت آگهی جدید
-        </Link>
-        <Link
-          href="/profile"
-          className="bg-gray-100 text-gray-700 py-4 px-6 rounded-xl text-center hover:bg-gray-200 transition flex flex-row justify-center items-center gap-3">
+        </button>
+        <button
+          onClick={() => dispatch(switchRoute("account"))}
+          className="bg-gray-100 cursor-pointer text-gray-700 py-4 px-6 rounded-xl text-center hover:bg-gray-200 transition flex flex-row justify-center items-center gap-3">
           <GoGear /> ویرایش اطلاعات حساب
-        </Link>
+        </button>
       </div>
     </div>
   );

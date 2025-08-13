@@ -1,8 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import LikedProperty from "../UI/LikedProperty";
-import { BiLike } from "react-icons/bi";
+import LikedProperty from "./LikedProperty";
+import { Green, Yellow } from "./Badges";
 import { useSession } from "next-auth/react";
+import { url_v1 } from "@/config/urls";
+
 type Property = {
   id: number;
   name: string;
@@ -18,65 +20,69 @@ type Pagination = {
   last_page: number;
 };
 
-export default function Liked() {
+export default function AddedProperties() {
   const [likedProps, setLikedProps] = useState<Property[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
   const [update, setUpdate] = useState(false);
   const session = useSession();
-  // Fetch liked properties from API
+  const token = session.data?.user?.access_token; // ✅ correct path to token
+
   useEffect(() => {
-    async function fetchLiked() {
+    async function fetchProperties() {
       setLoading(true);
       try {
-        const res = await fetch(
-          `https://amirpeyravan.ir/api/v1/user/favorites?page=${page}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.data?.access_token}`, // Add token here
-            },
-          }
-        );
-        const data = await res.json();
+        const res = await fetch(url_v1(`/user/properties?page=${page}`), {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
+        if (res.status === 401) {
+          console.error("Unauthorized - maybe token expired");
+          return;
+        }
+
+        const json = await res.json();
+
+        // Map API data to our UI structure
         setLikedProps(
-          data.data.favorites.map((fav: any) => ({
-            id: fav.property.id,
-            name: fav.property.title,
-            image: fav.property.primary_image_url,
-            views: fav.property.views_count,
-            url: `/properties/${fav.property.id}`,
+          json.data.properties.properties.map((prop: any) => ({
+            id: prop.id,
+            name: prop.title,
+            image: prop.primary_image_url,
+            views: prop.views_count,
+            url: `/properties/${prop.id}`,
           }))
         );
-        setPagination(data.data.pagination);
+
+        // Set pagination from meta
+        setPagination(json.data.properties.meta);
       } catch (err) {
-        console.error("Error fetching liked properties:", err);
+        console.error("Error fetching properties:", err);
+      } finally {
+        setLoading(false);
+        setUpdate(false);
       }
-      setLoading(false);
-      setUpdate(false);
     }
 
-    fetchLiked();
-  }, [page, update]);
+    if (token) {
+      fetchProperties();
+    }
+  }, [page, update, token]);
 
   return (
-    <div dir="rtl" className="m-3">
-      <div className="flex flex-row items-center justify-between">
-        <span className="font-bold text-xl text-gray-600 flex flex-row-reverse justify-center items-center">
-          آگهی مورد علاقه <BiLike className="w-7 h-7 mx-2" />
-        </span>
-      </div>
-
+    <div dir="rtl" className="m-3 w-full">
       {loading ? (
         <p className="mt-4 text-gray-500">در حال بارگذاری...</p>
       ) : (
         <LikedProperty likedProperties={likedProps} setUpdate={setUpdate} />
       )}
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       {pagination && pagination.last_page > 1 && (
         <div className="flex justify-center gap-4 mt-6">
           <button

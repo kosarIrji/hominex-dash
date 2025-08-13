@@ -2,12 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import authSlice from "./Slices/authSlice";
 import sidebarSlice from "./Slices/sidebar";
 import routeSwitch from "./Slices/routeSwitch";
+import Notification from "./Slices/notificationSlice";
 
 export const store = configureStore({
   reducer: {
     authSlice,
     sidebarSlice,
     routeSwitch,
+    Notification,
   },
 });
 

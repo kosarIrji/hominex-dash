@@ -5,7 +5,8 @@ import Image from "next/image";
 import { RiEditBoxLine } from "react-icons/ri";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { Indigo, Green, Yellow } from "../UI/Badges";
+import { Yellow, Green, Red } from "../UI/Badges";
+import { concatWithPlus } from "@/lib/concatWithPlus";
 export default function Account() {
   const client = useSelector((state: RootState) => state.authSlice.client);
   return (
@@ -13,7 +14,7 @@ export default function Account() {
       <div className="relative bg-[url('/assets/img/propertyBG.jpg')] bg-cover w-full h-[10rem] rounded-xl mb-10">
         <div className="pt-5 pr-5">
           <Yellow
-            value={`سطح ${
+            value={`دسترسی ${
               client.user_type === "regular"
                 ? "کاربر"
                 : client.user_type === "admin"
@@ -21,11 +22,16 @@ export default function Account() {
                 : "ویراستار"
             }`}
           />
+          {client.is_active ? (
+            <Green value="وضعیت فعال" />
+          ) : (
+            <Red value="وضعیت غیرفعال" />
+          )}
         </div>
         <div className="absolute w-fit h-fit left-10 bottom-[-2rem] flex justify-center items-center overflow-hidden">
-          <RiEditBoxLine className="absolute w-full h-full p-10 text-white bg-black/30 rounded-full cursor-pointer" />
+          {/* <RiEditBoxLine className="absolute w-full h-full p-10 text-white bg-black/30 rounded-full cursor-pointer" /> */}
           <Image
-            src={"/assets/img/profile.png"}
+            src={client.profile_picture + concatWithPlus(client.full_name)}
             width={100}
             height={100}
             alt="profile picture"

@@ -13,11 +13,16 @@ import { errorToast, successToast } from "@/config/Toasts";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { IoEyeOutline } from "react-icons/io5";
+import { IoEyeOffOutline } from "react-icons/io5";
+import { useRef } from "react";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
   const [phone, setPhone] = useState<string>("");
   const [password, SetPassword] = useState<string>("");
+  const [passwordType, setPasswordType] = useState<string>("password");
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   // handle form submition
@@ -45,6 +50,7 @@ export default function Login() {
       }
       setTimeout(() => {
         router.push(res.url || "/");
+        console.log("now redirect to /");
       }, 2000);
     } catch (e) {
       errorToast(e);
@@ -52,7 +58,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex mt-10 bg-white/40 backdrop-blur-2xl rounded-lg shadow-lg overflow-hidden mx-auto max-w-sm lg:max-w-4xl">
+    <div className="flex mt-10 bg-white/40 backdrop-blur-2xl rounded-lg shadow-lg overflow-hidden w-4xl mx-auto max-w-sm lg:max-w-4xl">
       <div
         className="hidden lg:block lg:w-1/2 bg-cover"
         style={{
@@ -110,7 +116,7 @@ export default function Login() {
           </label>
           <div className="flex justify-center items-center">
             <input
-              className="bg-gray-200 pl-15 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
+              className="bg-gray-200 pl-15 text-gray-700  focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
               type="text"
               dir="ltr"
               name="phone"
@@ -134,17 +140,30 @@ export default function Login() {
               رمز را فراموش کرده اید ؟
             </Link>
           </div>
-          <input
-            className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
-            type="password"
-            name="password"
-            value={password}
-            onChange={(e) => SetPassword(e.target.value)}
-            autoComplete="new-password"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleFormSubmit();
-            }}
-          />
+          <div className="relative">
+            <input
+              className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
+              type={passwordType}
+              name="password"
+              value={password}
+              onChange={(e) => SetPassword(e.target.value)}
+              autoComplete="new-password"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleFormSubmit();
+              }}
+            />
+            {passwordType === "text" ? (
+              <IoEyeOffOutline
+                onClick={() => setPasswordType("password")}
+                className="absolute left-3 w-5 h-5 bottom-[0.7rem] cursor-pointer"
+              />
+            ) : (
+              <IoEyeOutline
+                onClick={() => setPasswordType("text")}
+                className="absolute left-3 w-5 h-5 bottom-[0.7rem] cursor-pointer"
+              />
+            )}
+          </div>
         </div>
         {/* enter button */}
         <div className="mt-8 flex gap-2 [&>*]:h-13">
