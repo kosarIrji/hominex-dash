@@ -142,8 +142,10 @@ export default function UsersManagement() {
 
   // Render user cards
   const renderUserCards = (users: User[], title: string) => (
-    <div className="mb-8">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">{title}</h2>
+    <div className="mb-8 max-w-7xl mx-auto md:p-6 py-3 space-y-10">
+      <h2 className="md:text-2xl text-lg font-semibold text-gray-800 mb-4">
+        - {title}
+      </h2>
       {users.length === 0 ? (
         <p className="text-gray-600">هیچ کاربری در این دسته وجود ندارد.</p>
       ) : (
@@ -246,9 +248,11 @@ export default function UsersManagement() {
   );
 
   return (
-    <div dir="rtl" className="m-4 p-4  min-h-screen">
-      <h1 className="font-bold flex flex-row items-center text-2xl text-gray-800 mb-6">
-        <TbLockAccess className="w-7 h-7 mx-2" />
+    <div
+      dir="rtl"
+      className="m-4  min-h-screen max-w-7xl mx-auto md:p-6 py-3 space-y-10">
+      <h1 className="font-bold flex flex-row items-center md:text-2xl text-lg text-gray-800 mb-6">
+        <TbLockAccess className="w-7 h-7 md:mx-2" />
         مدیریت کاربران
       </h1>
       <div className="mb-6">

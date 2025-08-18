@@ -1,22 +1,29 @@
+// app/api/auth/register/route.ts
 import { NextResponse } from "next/server";
+import { url } from "@/config/urls"; // <-- Your backend URL helper
 
-export async function POST(request: Request) {
-  const { full_name, email, phone, password } = await request.json();
+export async function POST(req: Request) {
+  try {
+    // 🔹 Get body from frontend
+    const body = await req.json();
 
-  const res = await fetch("https://amirpeyravan.ir/api/auth/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ full_name, email, phone, password }),
-  });
+    // 🔹 Forward request to backend
+    const response = await fetch(url("/auth/register"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
-  const result = await res.json();
+    // 🔹 Parse backend response
+    const data = await response.json();
 
-  //   if (!result.success) {
-  //     return NextResponse.json(
-  //       { success: false, message: "Invalid login" },
-  //       { status: 401 }
-  //     );
-  //   }
-  console.log(result);
-  return NextResponse.json(result);
+    // 🔹 Return exactly what backend returned
+    return NextResponse.json(data, { status: response.status });
+  } catch (err) {
+    console.error("❌ Proxy error (register):", err);
+    return NextResponse.json(
+      { ok: false, message: "خطای سرور. دوباره تلاش کنید." },
+      { status: 500 }
+    );
+  }
 }

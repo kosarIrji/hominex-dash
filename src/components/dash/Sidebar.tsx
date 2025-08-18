@@ -21,7 +21,7 @@ export default function Sidebar() {
   const dispatch = useDispatch<AppDispatch>();
   return (
     <div
-      className={`absolute ${
+      className={`fixed ${
         Sidebar ? "right-0" : "right-[-100%]"
       } top-0 h-screen w-[15rem] bg-[var(--background)]/70 backdrop-blur-md shadow-2xl transition-all z-10`}>
       <div className="flex flex-row items-center py-1 px-3">

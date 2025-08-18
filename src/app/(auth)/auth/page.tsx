@@ -5,7 +5,7 @@ import Login from "@/components/auth/Login";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
-export default function page() {
+export default function Page() {
   const toggleAuth = useSelector(
     (state: RootState) => state.authSlice.toggleAuthPanel
   );

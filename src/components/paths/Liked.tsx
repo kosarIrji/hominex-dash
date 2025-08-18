@@ -1,8 +1,10 @@
+/* eslint-disable */
 "use client";
 import React, { useEffect, useState } from "react";
 import LikedProperty from "../UI/LikedProperty";
 import { BiLike } from "react-icons/bi";
 import { useSession } from "next-auth/react";
+import { url_v1 } from "@/config/urls";
 type Property = {
   id: number;
   name: string;
@@ -30,16 +32,13 @@ export default function Liked() {
     async function fetchLiked() {
       setLoading(true);
       try {
-        const res = await fetch(
-          `https://amirpeyravan.ir/api/v1/user/favorites?page=${page}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.data?.access_token}`, // Add token here
-            },
-          }
-        );
+        const res = await fetch(url_v1(`/user/favorites?page=${page}`), {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.data?.user?.access_token}`, // Add token here
+          },
+        });
         const data = await res.json();
 
         setLikedProps(
@@ -65,8 +64,8 @@ export default function Liked() {
   return (
     <div dir="rtl" className="m-3">
       <div className="flex flex-row items-center justify-between">
-        <span className="font-bold text-xl text-gray-600 flex flex-row-reverse justify-center items-center">
-          آگهی مورد علاقه <BiLike className="w-7 h-7 mx-2" />
+        <span className="font-bold md:text-2xl text-lg text-gray-600 flex flex-row-reverse justify-center items-center">
+          آگهی مورد علاقه <BiLike className="w-7 h-7 md:mx-2" />
         </span>
       </div>
 

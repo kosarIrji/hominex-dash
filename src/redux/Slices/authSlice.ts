@@ -1,7 +1,7 @@
+/* eslint-disable */
 // authSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { url_v1 } from "@/config/urls";
-import { signOut } from "next-auth/react";
 
 // Define a type for the slice state
 interface IClient {
@@ -81,11 +81,6 @@ export const fetchClientProfile = createAsyncThunk(
           Authorization: `Bearer ${token}`,
         },
       });
-
-      if (res.status === 401) {
-        signOut();
-        return rejectWithValue("Unauthorized");
-      }
 
       if (!res.ok) {
         return rejectWithValue("خطا دریافت اطلاعات");

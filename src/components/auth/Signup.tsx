@@ -1,7 +1,8 @@
+/* eslint-disable */
 import React, { useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import BlurText from "../../../blocks/TextAnimations/BlurText/BlurText";
-import OTP from "@/components/UI/OTP";
+import CodeOTP from "@/components/UI/CodeOTP";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { toggleAuth } from "@/redux/Slices/authSlice";
@@ -9,38 +10,43 @@ import { signupFormSchema } from "@/config/JoiSchema";
 import { errorToast, infoToast } from "@/config/Toasts";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { updateCLientData } from "@/redux/Slices/authSlice";
 import { IoEyeOutline } from "react-icons/io5";
 import { IoEyeOffOutline } from "react-icons/io5";
-
+import { url } from "@/config/urls";
 export default function Signup() {
   const dispatch = useDispatch<AppDispatch>();
 
-  const [full_name, setFullname] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
-  const [password, SetPassword] = useState<string>("");
-  const [passwordType, setPasswordType] = useState<string>("password");
-  const [OTP, setOTP] = useState<string>("");
-  //-----------
+  const [form, setForm] = useState({
+    full_name: "",
+    phone: "",
+    email: "",
+    password: "",
+  });
 
+  const [isOtp, setIsOtp] = useState<boolean>(false);
+  const [passwordType, setPasswordType] = useState<string>("password");
+  //-----------
   const [showOTP, setShowOTP] = useState<boolean>(false);
 
-  // handle form submition
-  const [otpCode, setOtpCode] = useState<string>("");
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     window.location.reload();
+  //   }, 2000);
+  // }, [isOtp]);
 
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // form submition
   const handleFormSubmition = async (e: React.FormEvent) => {
     try {
-      e.preventDefault();
-
-      const formData = {
-        full_name,
-        phone: "0" + phone,
-        password,
-        email,
-      };
-      const { error: validationError, value } =
-        signupFormSchema.validate(formData);
+      const { error: validationError, value } = signupFormSchema.validate(form);
       if (validationError) {
         const errorMessage = validationError.details
           .map((err) => err.message)
@@ -48,55 +54,37 @@ export default function Signup() {
         return errorToast(errorMessage);
       }
 
-      const response = await fetch(`/api/signup`, {
+      // send request
+      const response = await fetch(url("/auth/register"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          // اضافه کردن Origin header برای تست CORS
+          Origin: window.location.origin,
+        },
         body: JSON.stringify(value),
-        credentials: "include",
       });
-
-      const data = await response.json();
-      if (!response.ok) {
-        return errorToast(data.message || "ثبت‌ نام ناموفق بود.");
+      const res = await response.json();
+      if (res.success) {
+        infoToast(res.message);
+        // show OTP page
+        setShowOTP(true);
+      } else {
+        errorToast(res.message);
+        console.log(res);
       }
-      console.log(data);
-      setShowOTP(true);
-      infoToast(data.message);
-      dispatch(updateCLientData({ full_name, phone, password, email }));
+      // const data = await response.json();
+      // get the code
     } catch (err) {
       errorToast("خطایی رخ داد ، مجدد تلاش نمایید .");
       console.error(err);
     }
   };
 
-  useEffect(() => {
-    if (otpCode.length !== 6) return; // only send if complete
-    const sendOTP = async () => {
-      try {
-        const res = await fetch(`/api/signup`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone, code: otpCode }),
-          credentials: "include",
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-          setShowOTP(false);
-          dispatch(toggleAuth());
-        } else {
-          errorToast(data.message || "OTP verification failed.");
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    sendOTP();
-  }, [otpCode]);
-
   return (
     <>
-      <div className="flex mt-10 bg-white/40 backdrop-blur-2xl rounded-lg shadow-lg overflow-hidden mx-auto w-4xl max-w-sm lg:max-w-4xl">
+      <div className="flex h-screen pt-10 md:pt-0 w-full md:h-auto md:mt-10 bg-white/40 backdrop-blur-2xl md:rounded-lg shadow-lg overflow-hidden md:w-4xl md:mx-auto md:max-w-sm lg:max-w-4xl">
         <div
           className="hidden lg:block lg:w-1/2 bg-cover"
           style={{
@@ -158,9 +146,9 @@ export default function Signup() {
               <input
                 className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
                 type="text"
-                name="fullname"
-                value={full_name}
-                onChange={(e) => setFullname(e.target.value)}
+                name="full_name"
+                value={form.full_name}
+                onChange={handleChange}
               />
             </div>
             {/* email */}
@@ -174,8 +162,8 @@ export default function Signup() {
                 className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
                 type="email"
                 name="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={form.email}
+                onChange={handleChange}
                 placeholder="Example@gmail.com"
                 dir="ltr"
               />
@@ -191,10 +179,11 @@ export default function Signup() {
                 className="bg-gray-200 pl-15 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
                 type="text"
                 name="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                value={form.phone}
+                onChange={handleChange}
                 dir="ltr"
-                maxLength={10}
+                maxLength={11}
+                placeholder="09..."
               />
               <span className="absolute left-3 border-r-2 pr-3 font-bold text-gray-700">
                 98+
@@ -217,8 +206,8 @@ export default function Signup() {
                 className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
                 type={passwordType}
                 name="password"
-                value={password}
-                onChange={(e) => SetPassword(e.target.value)}
+                value={form.password}
+                onChange={handleChange}
                 autoComplete="new-password"
               />
               {passwordType === "text" ? (
@@ -239,7 +228,7 @@ export default function Signup() {
             <button
               onClick={(e) => handleFormSubmition(e)}
               className="bg-gray-700 text-white font-bold py-2 px-4 w-full rounded hover:bg-gray-600 flex justify-center items-center gap-1 hover:gap-5 transition-all cursor-pointer">
-              ثبت نام <IoIosArrowRoundBack className="" />
+              دریافت کد تایید <IoIosArrowRoundBack className="" />
             </button>
           </div>
           <div className="mt-4 flex items-center justify-between">
@@ -253,7 +242,13 @@ export default function Signup() {
           </div>
         </div>
       </div>
-      {showOTP && <OTP setShowOTP={setShowOTP} />}
+      {showOTP && (
+        <CodeOTP
+          phone={form.phone}
+          setShowOTP={setShowOTP}
+          setIsOtp={setIsOtp}
+        />
+      )}
     </>
   );
 }

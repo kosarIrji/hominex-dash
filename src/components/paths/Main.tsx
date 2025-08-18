@@ -38,15 +38,15 @@ export default function Main() {
     { title: "آپارتمان 80 متری نوساز", date: "1403/04/12" },
     { title: "زمین 200 متری در لواسان", date: "1403/04/10" },
   ];
-  console.log(client);
+  // console.log(client);
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-10" dir="rtl">
+    <div className="max-w-7xl mx-auto md:p-6 py-3 space-y-10" dir="rtl">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800 flex flex-row gap-3">
+        <h1 className="md:text-2xl text-lg font-bold text-gray-800 flex flex-row gap-3">
           <MdOutlineWavingHand className="w-7 h-7" /> خوش آمدید{" "}
           {client.full_name}
         </h1>
-        <p className="text-gray-500">
+        <p className="text-gray-500 text-sm md:mt-0">
           در اینجا خلاصه‌ای از فعالیت‌های اخیر شما را می‌بینید.
         </p>
       </div>
@@ -70,15 +70,17 @@ export default function Main() {
 
       {/* Recent Ads */}
       <div>
-        <h3 className="text-xl font-semibold mb-4 flex flex-row items-center gap-3">
+        <h3 className="md:text-2xl text-lg font-semibold mb-4 flex flex-row items-center gap-3">
           <LuCalendarClock className="w-7 h-7" /> آگهی‌های اخیر شما
         </h3>
         <ul className="space-y-3">
           {recentAds.map((ad, i) => (
             <li
               key={i}
-              className="bg-gray-50 border rounded-lg p-4 flex justify-between items-center">
-              <span className="text-gray-700 font-medium">{ad.title}</span>
+              className="bg-gray-50 shadow-md rounded-lg p-4 flex justify-between items-center">
+              <span className="text-gray-700 font-medium  text-sm">
+                {ad.title}
+              </span>
               <span className="text-gray-400 text-sm">{ad.date}</span>
             </li>
           ))}

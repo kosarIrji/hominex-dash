@@ -3,41 +3,93 @@ import React, { useEffect, useState } from "react";
 import { iranProvinces } from "../../config/Provinces";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { url_v1 } from "@/config/urls";
+import { useSession } from "next-auth/react";
+import { errorToast, successToast } from "@/config/Toasts";
 
 export default function AccountInfo() {
   const client = useSelector((state: RootState) => state.authSlice.client);
-
-  const [selectedProvince, setSelectedProvince] = useState<string>("");
   const [cities, setCities] = useState<string[]>([]);
-  const [selectedCity, setSelectedCity] = useState<string>("");
 
-  const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const province = e.target.value;
-    setSelectedProvince(province);
+  const [form, setForm] = useState({
+    selectedProvince: "",
+    selectedCity: "",
+    maritalStatus: "",
+    jobTitle: "",
+    age: 0,
+  });
 
-    const found = iranProvinces.find((item) => item.استان === province);
-    setCities(found ? found.شهرها : []);
-    setSelectedCity("");
+  const session = useSession();
+  const token = session.data?.user?.access_token;
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "selectedProvince") {
+      const found = iranProvinces.find((item) => item.استان === value);
+      setCities(found ? found.شهرها : []);
+      setForm((prev) => ({ ...prev, selectedCity: "" }));
+    }
   };
 
   useEffect(() => {
-    if (client?.residence_province) {
-      setSelectedProvince(client.residence_province);
+    if (client) {
+      setForm({
+        selectedProvince: client.residence_province || "",
+        selectedCity: client.residence_city || "",
+        maritalStatus: client.marital_status || "",
+        jobTitle: client.job_title || "",
+        age: client.age || 0,
+      });
 
-      const found = iranProvinces.find(
-        (item) => item.استان === client.residence_province
-      );
-      setCities(found ? found.شهرها : []);
-
-      if (client?.residence_city) {
-        setSelectedCity(client.residence_city);
+      if (client.residence_province) {
+        const found = iranProvinces.find(
+          (item) => item.استان === client.residence_province
+        );
+        setCities(found ? found.شهرها : []);
       }
     }
   }, [client]);
 
+  const handleCompleteProfile = async () => {
+    try {
+      const response = await fetch(url_v1("/user/profile/complete"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          age: form.age,
+          marital_status: form.maritalStatus,
+          job_title: form.jobTitle,
+          residence_province: form.selectedProvince,
+          residence_city: form.selectedCity,
+        }),
+      });
+
+      const res = await response.json();
+
+      if (response.ok) {
+        successToast(res.message);
+        window.location.reload(); // reloads the current page
+      } else {
+        errorToast(res.message);
+      }
+    } catch (e) {
+      console.log(e);
+      errorToast("خطا در ارسال اطلاعات");
+    }
+  };
+
   return (
     <div className="p-4" dir="rtl">
-      <form className="max-w-7xl mx-auto sm:p-6 grid gap-6">
+      <div className="max-w-7xl mx-auto sm:p-6 grid gap-6">
         {/* Full Name & Email */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="flex flex-col">
@@ -73,11 +125,14 @@ export default function AccountInfo() {
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="flex flex-col">
             <label htmlFor="dob" className="font-medium text-gray-700 mb-1">
-              تاریخ تولد
+              سن
             </label>
             <input
               id="dob"
-              type="date"
+              name="age"
+              type="number"
+              value={form.age}
+              onChange={handleChange}
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -104,13 +159,16 @@ export default function AccountInfo() {
               className="font-medium text-gray-700 mb-1">
               وضعیت تاهل
             </label>
-            <input
+            <select
               id="maritalStatus"
-              type="text"
-              placeholder={client?.marital_status || ""}
-              disabled
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
-            />
+              name="maritalStatus"
+              value={form.maritalStatus}
+              onChange={handleChange}
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300">
+              <option value="">انتخاب</option>
+              <option value="single">مجرد</option>
+              <option value="married">متاهل</option>
+            </select>
           </div>
 
           <div className="flex flex-col">
@@ -121,17 +179,18 @@ export default function AccountInfo() {
             </label>
             <input
               id="jobTitle"
+              name="jobTitle"
               type="text"
+              value={form.jobTitle}
+              onChange={handleChange}
               placeholder={client?.job_title || ""}
-              disabled
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 "
             />
           </div>
         </div>
 
         {/* Province, City, Landlord */}
         <div className="grid sm:grid-cols-3 gap-4">
-          {/* Province */}
           <div className="flex flex-col">
             <label
               htmlFor="province"
@@ -140,8 +199,9 @@ export default function AccountInfo() {
             </label>
             <select
               id="province"
-              value={selectedProvince}
-              onChange={handleProvinceChange}
+              name="selectedProvince"
+              value={form.selectedProvince}
+              onChange={handleChange}
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">انتخاب استان</option>
               {iranProvinces.map((item) => (
@@ -152,15 +212,15 @@ export default function AccountInfo() {
             </select>
           </div>
 
-          {/* City */}
           <div className="flex flex-col">
             <label htmlFor="city" className="font-medium text-gray-700 mb-1">
               شهر
             </label>
             <select
               id="city"
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
+              name="selectedCity"
+              value={form.selectedCity}
+              onChange={handleChange}
               disabled={!cities.length}
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
               <option value="">
@@ -174,8 +234,7 @@ export default function AccountInfo() {
             </select>
           </div>
 
-          {/* Landlord */}
-          <div className="flex flex-col">
+          {/* <div className="flex flex-col">
             <label
               htmlFor="landlord"
               className="font-medium text-gray-700 mb-1">
@@ -183,23 +242,24 @@ export default function AccountInfo() {
             </label>
             <select
               id="landlord"
+              name="landlord"
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">انتخاب</option>
               <option value="yes">بله</option>
               <option value="no">خیر</option>
             </select>
-          </div>
+          </div> */}
         </div>
 
-        {/* Submit */}
         <div className="text-right">
           <button
-            type="submit"
+            type="button"
+            onClick={handleCompleteProfile}
             className="px-6 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer">
             تایید اطلاعات
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

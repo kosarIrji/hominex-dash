@@ -4,13 +4,15 @@ import Table from "../UI/Table";
 import { LuTickets } from "react-icons/lu";
 import { useState } from "react";
 import AddTicketForm from "../UI/AddTicketForm";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
 
 export default function Tickets() {
   const [toggleAddNew, setToggleAddNew] = useState<boolean>(false);
+
   return (
-    <div dir="rtl">
+    <div dir="rtl relative">
+      <div className="absolute z-[2] left-0 top-0 w-full h-full bg-white/50 backdrop-blur-sm flex justify-center items-center">
+        <span>صفحه درحال توسعه ☢️</span>
+      </div>
       <div className="flex flex-row items-center justify-between">
         <span className="font-bold text-xl text-gray-600 flex flex-row-reverse justify-center items-center">
           تیکت ها <LuTickets className="w-7 h-7 mx-2" />

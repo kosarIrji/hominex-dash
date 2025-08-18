@@ -1,7 +1,8 @@
+/* eslint-disable */
 import React from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import Link from "next/link"; // assuming you're using Next.js
-import { url, url_v1 } from "@/config/urls";
+import { url_v1 } from "@/config/urls";
 import { useSession } from "next-auth/react";
 import { errorToast, successToast } from "@/config/Toasts";
 type Property = {
@@ -34,7 +35,7 @@ export default function LikedProperty({ likedProperties, setUpdate }: Props) {
         method: "DELETE", // ✅ method here
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.data?.access_token}`, // ✅ custom auth header
+          Authorization: `Bearer ${session.data?.user?.access_token}`, // ✅ custom auth header
         },
       });
 

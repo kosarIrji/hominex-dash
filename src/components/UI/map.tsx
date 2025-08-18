@@ -139,10 +139,10 @@ const MapComponent = ({ mapSelection, setMapSelection }: IMap) => {
   return (
     <MapContainer
       center={position}
-      zoom={28}
-      minZoom={12}
-      style={{ height: "400px", width: "100%", borderRadius: "5px" }}
-      className="shadow-lg rounded-xl shadow-black/20 border border-white/20"
+      zoom={25}
+      minZoom={11}
+      style={{ width: "100%", borderRadius: "5px" }}
+      className="shadow-lg md:h-[400px] h-[200px] rounded-xl shadow-black/20 border border-white/20"
       touchZoom={false}
       keyboard={false}
       boxZoom={false}

@@ -1,34 +1,39 @@
 "use client";
-import React from "react";
+
+import React, { useState, useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import BlurText from "../../../blocks/TextAnimations/BlurText/BlurText";
-import OTP from "@/components/UI/OTP";
 import { MdOutlineTextsms } from "react-icons/md";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { toggleAuth } from "@/redux/Slices/authSlice";
-import { useState } from "react";
 import { loginFormSchema } from "@/config/JoiSchema";
 import { errorToast, successToast } from "@/config/Toasts";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { IoEyeOutline } from "react-icons/io5";
 import { IoEyeOffOutline } from "react-icons/io5";
-import { useRef } from "react";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
   const [phone, setPhone] = useState<string>("");
-  const [password, SetPassword] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [passwordType, setPasswordType] = useState<string>("password");
-  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const { data: session, status } = useSession();
 
-  // handle form submition
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
+
+  // Handle form submission
   const handleFormSubmit = async () => {
     try {
-      // validate the inputs
+      // Validate the inputs
       const formData = { phone, password };
       const { error, value } = loginFormSchema.validate(formData);
       if (error) {
@@ -36,29 +41,43 @@ export default function Login() {
         return errorToast(errorMessage);
       }
 
-      // sending validated request to back-end
+      // Send validated request to NextAuth
       const res = await signIn("credentials", {
         phone: value.phone,
         password: value.password,
         redirect: false,
-        callbackUrl: "/",
+        callbackUrl: `${process.env.NEXTAUTH_URL || ""}/`,
       });
+
+      console.log("signIn Response:", res);
+
+      if (res?.error) {
+        errorToast(`خطا در ورود: ${res.error}`);
+        return;
+      }
 
       if (res?.ok) {
         successToast("ورود موفق");
-        console.log(res);
+        // Wait for session to update before redirecting
+        setTimeout(() => {
+          if (status === "authenticated" || session) {
+            router.push(res.url || "/");
+            console.log("Redirecting to /");
+          } else {
+            errorToast("جلسه ایجاد نشد. لطفاً دوباره تلاش کنید.");
+          }
+        }, 1000);
+      } else {
+        errorToast("خطا در ورود. لطفاً دوباره تلاش کنید.");
       }
-      setTimeout(() => {
-        router.push(res.url || "/");
-        console.log("now redirect to /");
-      }, 2000);
     } catch (e) {
-      errorToast(e);
+      console.error("Login Error:", e);
+      errorToast("خطای غیرمنتظره رخ داده است.");
     }
   };
 
   return (
-    <div className="flex mt-10 bg-white/40 backdrop-blur-2xl rounded-lg shadow-lg overflow-hidden w-4xl mx-auto max-w-sm lg:max-w-4xl">
+    <div className="flex h-screen pt-16 md:pt-0 w-full md:h-auto md:mt-10 bg-white/40 backdrop-blur-2xl md:rounded-lg shadow-lg overflow-hidden md:w-4xl md:mx-auto md:max-w-sm lg:max-w-4xl">
       <div
         className="hidden lg:block lg:w-1/2 bg-cover"
         style={{
@@ -75,6 +94,7 @@ export default function Login() {
           />
         </div>
         <p className="text-xl text-gray-600 text-center">ورود به سایت</p>
+        {/* Note: Google provider is not configured in [...nextauth]/route.ts. Remove or configure it */}
         <span
           onClick={() => signIn("google", { redirectTo: "/" })}
           className="flex cursor-pointer items-center justify-center mt-4 text-white rounded-lg shadow-md transition-colors bg-gray-100 hover:bg-gray-100/60">
@@ -109,14 +129,14 @@ export default function Login() {
           </span>
           <span className="border-b w-1/5 lg:w-1/4"></span>
         </div>
-        {/* phone number */}
+        {/* Phone number */}
         <div className="mt-4 relative">
           <label className="block text-gray-700 text-sm font-bold mb-2">
-            شماره تلفن{" "}
+            شماره تلفن
           </label>
           <div className="flex justify-center items-center">
             <input
-              className="bg-gray-200 pl-15 text-gray-700  focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
+              className="bg-gray-200 pl-15 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
               type="text"
               dir="ltr"
               name="phone"
@@ -130,14 +150,14 @@ export default function Login() {
           </div>
         </div>
 
-        {/* password */}
+        {/* Password */}
         <div className="mt-4">
           <div className="flex justify-between">
             <label className="block text-gray-700 text-sm font-bold mb-2">
               رمز ورود
             </label>
             <Link href="#" className="text-xs text-gray-500">
-              رمز را فراموش کرده اید ؟
+              رمز را فراموش کرده اید؟
             </Link>
           </div>
           <div className="relative">
@@ -146,7 +166,7 @@ export default function Login() {
               type={passwordType}
               name="password"
               value={password}
-              onChange={(e) => SetPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleFormSubmit();
@@ -165,7 +185,7 @@ export default function Login() {
             )}
           </div>
         </div>
-        {/* enter button */}
+        {/* Enter button */}
         <div className="mt-8 flex gap-2 [&>*]:h-13">
           <button
             onClick={() => handleFormSubmit()}
@@ -176,9 +196,9 @@ export default function Login() {
           </button>
           <button
             type="button"
-            className="text-white w-[14rem] justify-center gap-2 cursor-pointer bg-[#2557D6] hover:bg-[#2557D6]/90 focus:ring-4 focus:ring-[#2557D6]/50 focus:outline-none font-medium rounded text-sm py-2 px-4 text-center inline-flex items-center dark:focus:ring-[#2557D6]/50 me-2">
-            رمز یکبار مصرف
-            <MdOutlineTextsms />
+            className="text-white relative overflow-hidden w-[14rem] justify-center gap-2 cursor-pointer bg-[#2557D6] hover:bg-[#2557D6]/90 focus:ring-4 focus:ring-[#2557D6]/50 focus:outline-none font-medium rounded text-sm py-2 px-4 text-center inline-flex items-center dark:focus:ring-[#2557D6]/50 me-2">
+            کد یکبار مصرف
+            <MdOutlineTextsms className="absolute right-[-5px] rotate-45 top-[-10px] w-10 h-10 opacity-20" />
           </button>
         </div>
         <div className="mt-4 flex items-center justify-between">
@@ -191,7 +211,6 @@ export default function Login() {
           <span className="border-b w-1/5 md:w-1/4"></span>
         </div>
       </div>
-      {/* <OTP /> */}
     </div>
   );
 }

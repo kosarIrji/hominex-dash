@@ -55,6 +55,17 @@
     --foreground: #ededed;
   } */
 /* } */
+
+* {
+  scrollbar-width: none; /* for Firefox */
+  -ms-overflow-style: none; /* for IE and Edge */
+}
+
+/* For Chrome, Safari, Opera */
+*::-webkit-scrollbar {
+  display: none;
+}
+
 html,
 body {
   background: var(--light-forground);

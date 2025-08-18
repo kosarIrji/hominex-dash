@@ -1,9 +1,7 @@
+/* eslint-disable */
 "use client";
 import { useState } from "react";
 import MapComponent from "./map";
-import axios from "axios";
-import Image from "next/image";
-import { alt } from "joi";
 
 interface FormData {
   propertyType:

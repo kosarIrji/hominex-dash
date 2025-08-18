@@ -8,7 +8,7 @@ import {
   VscTrash,
   VscEllipsis,
 } from "react-icons/vsc";
-import { url, url_v1 } from "@/config/urls";
+import { url_v1 } from "@/config/urls";
 
 // TypeScript interfaces
 interface Consultant {
@@ -74,7 +74,7 @@ const ConsultationsPage: React.FC = () => {
 
   useEffect(() => {
     async function fetchConsultations() {
-      if (!session?.access_token) return;
+      if (!session?.user?.access_token) return;
 
       setLoading(true);
       setError(null);
@@ -82,7 +82,7 @@ const ConsultationsPage: React.FC = () => {
         const res = await fetch(url_v1("/user/consultation-requests"), {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
+            Authorization: `Bearer ${session.user?.access_token}`,
           },
         });
         if (!res.ok) throw new Error(`خطا در دریافت اطلاعات: ${res.status}`);
@@ -105,7 +105,7 @@ const ConsultationsPage: React.FC = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
+          Authorization: `Bearer ${session?.user?.access_token}`,
         },
       });
       if (!res.ok) throw new Error(`خطا در دریافت جزئیات: ${res.status}`);
@@ -126,7 +126,7 @@ const ConsultationsPage: React.FC = () => {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
+          Authorization: `Bearer ${session?.user?.access_token}`,
         },
       });
       if (!res.ok) throw new Error(`خطا در حذف درخواست: ${res.status}`);
@@ -140,14 +140,6 @@ const ConsultationsPage: React.FC = () => {
   const handleAnotherAction = (id: number) => {
     alert(`اقدام دیگر برای درخواست مشاوره ${id} کلیک شد.`);
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -170,11 +162,11 @@ const ConsultationsPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-5xl">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+    <div className="container mx-auto p-6  max-w-7xl md:p-6 py-3 space-y-10">
+      <div className="flex justify-end items-center mb-8">
+        <h1 className="md:text-2xl text-lg  font-bold text-gray-900 flex items-center gap-3">
           درخواست‌های مشاوره ({consultations.length})
-          <VscGitPullRequestDraft className="w-8 h-8 text-blue-600" />
+          <VscGitPullRequestDraft className="w-7 h-7" />
         </h1>
       </div>
       <div className="grid gap-6">

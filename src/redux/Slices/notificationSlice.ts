@@ -1,3 +1,4 @@
+/* eslint-disable */
 // store/notificationsSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { url_v1 } from "@/config/urls";

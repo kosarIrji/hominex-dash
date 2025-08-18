@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import LikedProperty from "./LikedProperty";
-import { Green, Yellow } from "./Badges";
 import { useSession } from "next-auth/react";
 import { url_v1 } from "@/config/urls";
 
@@ -48,9 +47,17 @@ export default function AddedProperties() {
 
         const json = await res.json();
 
+        type Props = {
+          id: number;
+          title: string;
+          primary_image_url: string;
+          views_count: string;
+          url: string;
+        };
         // Map API data to our UI structure
         setLikedProps(
-          json.data.properties.properties.map((prop: any) => ({
+          /* eslint-disable no-console, no-unused-vars */
+          json.data.properties.properties.map((prop: Props) => ({
             id: prop.id,
             name: prop.title,
             image: prop.primary_image_url,
@@ -58,6 +65,7 @@ export default function AddedProperties() {
             url: `/properties/${prop.id}`,
           }))
         );
+        /* eslint-enable no-console, no-unused-vars */
 
         // Set pagination from meta
         setPagination(json.data.properties.meta);

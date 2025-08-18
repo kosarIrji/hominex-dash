@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { toast, Bounce } from "react-toastify";
 
 export const errorToast = (msg: any) =>

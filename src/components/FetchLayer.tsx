@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { fetchClientProfile } from "@/redux/Slices/authSlice";
 import { fetchNotifications } from "@/redux/Slices/notificationSlice";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import FullPageLoader from "@/components/UI/LoadingScreen";
 
 type Props = {
@@ -15,7 +15,7 @@ export default function FetchLayer({ children }: Props) {
   const dispatch = useDispatch<AppDispatch>();
   const session = useSession();
   const token = session.data?.user?.access_token;
-
+  // console.log(token);
   // Get loading states from both slices
   const authLoading = useSelector(
     (state: RootState) => state.authSlice.loading
