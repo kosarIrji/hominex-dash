@@ -105,7 +105,10 @@ export default function Nav() {
         {/* <IoSettingsOutline className="w-5 h-5" /> */}
       </div>
 
-      <div className={`${Sidebar ? "mr-[15rem]" : ""} z-10 transition-all`}>
+      <div
+        className={`${
+          Sidebar ? "mr-[15rem] absolute z-50" : ""
+        } z-10 transition-all`}>
         {Sidebar ? (
           <IoIosArrowForward
             onClick={() => dispatch(toggleSidebar(false))}

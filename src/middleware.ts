@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// use this for production : __Secure-authjs.session-token
+// use for dev : authjs.session-token
+
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("__Secure-authjs.session-token")?.value;
+  const token = request.cookies.get(process.env.COOKIE_NAME as string)?.value;
   const isAuthPage = request.nextUrl.pathname === "/auth";
 
   if (!token && !isAuthPage) {

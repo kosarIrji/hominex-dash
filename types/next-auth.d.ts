@@ -1,5 +1,4 @@
 // types/next-auth.d.ts
-
 import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
 
 declare module "next-auth" {
@@ -11,6 +10,7 @@ declare module "next-auth" {
       user_type: string;
       access_token: string;
     } & DefaultSession["user"];
+    error?: string; // optional error from token refresh
   }
 
   interface User extends DefaultUser {
@@ -29,5 +29,7 @@ declare module "next-auth/jwt" {
     full_name: string;
     user_type: string;
     access_token: string;
+    accessTokenExpires?: number; // expiration timestamp in ms
+    error?: string; // optional error from refresh
   }
 }

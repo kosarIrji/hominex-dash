@@ -52,7 +52,7 @@ export default function Main() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 md:gap-6 gap-3">
         {stats.map((stat, i) => (
           <SpotlightCard
             key={i}
@@ -60,7 +60,7 @@ export default function Main() {
             spotlightColor="rgba(0, 229, 255, 0.5)">
             <Link
               href={stat.href}
-              className="block relative rounded-xl px-6 py-4 transition">
+              className="block relative rounded-xl md:px-6 px-0 md:py-4 py-0 transition">
               <h2 className="text-sm text-gray-500 mb-1">{stat.label}</h2>
               <p className="text-4xl font-bold text-blue-600">{stat.value}</p>
             </Link>

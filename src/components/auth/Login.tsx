@@ -27,6 +27,8 @@ export default function Login() {
   useEffect(() => {
     if (status === "authenticated") {
       router.push("/");
+    } else {
+      successToast("ورود موفق.");
     }
   }, [status, router]);
 
@@ -49,8 +51,6 @@ export default function Login() {
         callbackUrl: `${process.env.NEXTAUTH_URL || ""}/`,
       });
 
-      console.log("signIn Response:", res);
-
       if (res?.error) {
         errorToast(`خطا در ورود: ${res.error}`);
         return;
@@ -62,10 +62,8 @@ export default function Login() {
         setTimeout(() => {
           if (status === "authenticated" || session) {
             router.push(res.url || "/");
-            console.log("Redirecting to /");
-          } else {
-            errorToast("جلسه ایجاد نشد. لطفاً دوباره تلاش کنید.");
           }
+          console.log(status);
         }, 1000);
       } else {
         errorToast("خطا در ورود. لطفاً دوباره تلاش کنید.");

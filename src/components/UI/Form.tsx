@@ -2,7 +2,7 @@
 "use client";
 import { useState } from "react";
 import MapComponent from "./map";
-
+import ImageUploader from "./ImageUploader";
 interface FormData {
   propertyType:
     | "residential"
@@ -217,8 +217,16 @@ export default function SubmitPropertyPage() {
   const isLand = formData.propertyType === "land";
   const isPresale = formData.propertyType === "presale";
 
+  const onSelectedImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      console.log(e.target.files); // FileList
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg font-morabba">
+      {/* uploading images section */}
+      <ImageUploader />
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Property Type */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
