@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 // use for dev : authjs.session-token
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get(process.env.COOKIE_NAME as string)?.value;
+  const token = request.cookies.get("authjs.session-token")?.value;
   const isAuthPage = request.nextUrl.pathname === "/auth";
 
   if (!token && !isAuthPage) {

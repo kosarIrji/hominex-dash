@@ -56,7 +56,6 @@ export default function AddedProperties() {
         };
         // Map API data to our UI structure
         setLikedProps(
-          /* eslint-disable no-console, no-unused-vars */
           json.data.properties.properties.map((prop: Props) => ({
             id: prop.id,
             name: prop.title,
@@ -65,7 +64,6 @@ export default function AddedProperties() {
             url: `/properties/${prop.id}`,
           }))
         );
-        /* eslint-enable no-console, no-unused-vars */
 
         // Set pagination from meta
         setPagination(json.data.properties.meta);

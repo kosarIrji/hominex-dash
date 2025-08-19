@@ -235,7 +235,7 @@ export default function Signup() {
             <span className="border-b w-1/5 md:w-1/4"></span>
             <span
               onClick={() => dispatch(toggleAuth())}
-              className="text-xs text-gray-500 cursor-pointer hover:text-black transition-colors">
+              className="text-xs cursor-pointer text-black transition-colors">
               ورود به سایت
             </span>
             <span className="border-b w-1/5 md:w-1/4"></span>

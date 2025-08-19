@@ -69,6 +69,7 @@ const statusStyles: { [key: string]: string } = {
 const ConsultationsPage: React.FC = () => {
   const { data: session } = useSession();
   const [consultations, setConsultations] = useState<Consultation[]>([]);
+  // eslint-disable-next-line
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

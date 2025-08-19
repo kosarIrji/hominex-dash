@@ -17,6 +17,7 @@ interface AuthUser extends AdapterUser {
 }
 
 // Helper to refresh access token
+// eslint-disable-next-line
 async function refreshAccessToken(token: any) {
   try {
     const res = await fetch(url("/auth/refresh"), {
@@ -137,7 +138,7 @@ const authOptions: NextAuthConfig = {
       return baseUrl;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: "bJNWiw4XmzEsjvFuUNDAM721g+yTm3oZu0Ot0jtSvsM=",
 };
 
 const { handlers } = NextAuth(authOptions);

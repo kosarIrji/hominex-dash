@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { X } from "lucide-react"; // using lucide-react icons (shadcn uses it too)
-
+import Image from "next/image";
 export default function ImageUploader() {
   const [images, setImages] = useState<string[]>([]);
 
@@ -43,7 +43,9 @@ export default function ImageUploader() {
       <div className="flex flex-wrap gap-4 justify-center md:justify-start">
         {images.map((src, idx) => (
           <div key={idx} className="w-32 h-32 relative group">
-            <img
+            <Image
+              width={100}
+              height={100}
               src={src}
               alt={`preview ${idx}`}
               className="w-full h-full object-cover rounded-lg shadow"
