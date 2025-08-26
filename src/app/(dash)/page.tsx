@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { TbRouteAltRight } from "react-icons/tb";
 import dynamic from "next/dynamic";
 import LoadingSpinner from "@/components/UI/LoadingSpinner";
+import AllProperties from "@/components/paths/AllProperties";
 
 // main routes
 const Main = dynamic(() => import("../../components/paths/Main"), {
@@ -54,6 +55,7 @@ export default function Page() {
         {route === "account" && <Account />}
         {route === "UsersManagement" && <UsersManagement />}
         {route === "consultation" && <ConsultationRequests />}
+        {route === "allProperties" && <AllProperties />}
       </div>
     </div>
   );

@@ -141,7 +141,7 @@ const MapComponent = ({ mapSelection, setMapSelection }: IMap) => {
       center={position}
       zoom={25}
       minZoom={11}
-      style={{ width: "100%", borderRadius: "5px" }}
+      style={{ width: "100%", borderRadius: "5px", zIndex: "0" }}
       className="shadow-lg md:h-[400px] h-[200px] rounded-xl shadow-black/20 border border-white/20"
       touchZoom={false}
       keyboard={false}

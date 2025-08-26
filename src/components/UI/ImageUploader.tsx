@@ -1,34 +1,57 @@
 "use client";
-import { useState } from "react";
-import { X } from "lucide-react"; // using lucide-react icons (shadcn uses it too)
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import Image from "next/image";
-export default function ImageUploader() {
-  const [images, setImages] = useState<string[]>([]);
+import { VscCloudUpload } from "react-icons/vsc";
 
-  const onSelectedImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+interface ImageUploaderProps {
+  onSelectedImages: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onUpload: () => Promise<void>;
+}
+
+export default function ImageUploader({
+  onSelectedImages,
+}: ImageUploaderProps) {
+  const [images, setImages] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  const handleImageSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
-    const filesArray = Array.from(e.target.files);
+    const filesArray = Array.from(e.target.files).slice(0, 20); // Limit to 20 images
+    console.log("ImageUploader selected files:", filesArray); // Debug log
     const imageUrls = filesArray.map((file) => URL.createObjectURL(file));
 
-    // ✅ Append new images instead of replacing
+    // Append new images and files
     setImages((prev) => [...prev, ...imageUrls]);
+    setSelectedFiles((prev) => [...prev, ...filesArray]);
 
-    // ⚠️ Don’t revoke URLs immediately or the preview will break
-    // Instead, revoke when deleting or on unmount
+    // Trigger onSelectedImages to sync with parent
+    onSelectedImages(e);
   };
 
   const removeImage = (src: string) => {
     setImages((prev) => prev.filter((img) => img !== src));
-    URL.revokeObjectURL(src); // cleanup memory
+    setSelectedFiles((prev) =>
+      prev.filter((_, idx) => URL.createObjectURL(prev[idx]) !== src)
+    );
+    URL.revokeObjectURL(src); // Cleanup memory
   };
 
+  // Cleanup URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      images.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [images]);
+
   return (
-    <div className="mb-10">
+    <div className="mb-10" dir="rtl">
       <label
         htmlFor="land-images"
-        className="w-full h-40 mb-5 border cursor-pointer border-dashed text-gray-500 border-gray-500 rounded-sm flex justify-center items-center">
-        بارگذاری تصاویر
+        className="w-full h-40 mb-5 flex-col border cursor-pointer border-dashed text-gray-500 border-gray-500 rounded-sm flex justify-center items-center">
+        <VscCloudUpload className="w-8 h-8" />
+        بارگذاری تصاویر (حداکثر ۲۰ تصویر)
       </label>
 
       <input
@@ -36,7 +59,7 @@ export default function ImageUploader() {
         id="land-images"
         accept="image/*"
         multiple
-        onChange={onSelectedImages}
+        onChange={handleImageSelection}
         className="hidden"
       />
 
@@ -50,7 +73,6 @@ export default function ImageUploader() {
               alt={`preview ${idx}`}
               className="w-full h-full object-cover rounded-lg shadow"
             />
-            {/* Delete button */}
             <button
               type="button"
               onClick={() => removeImage(src)}
@@ -60,6 +82,10 @@ export default function ImageUploader() {
           </div>
         ))}
       </div>
+      <p className="text-xs text-gray-500 mt-2">
+        {selectedFiles.length} تصویر انتخاب شده است (حداکثر ۵ مگابایت برای هر
+        تصویر)
+      </p>
     </div>
   );
 }

@@ -8,22 +8,27 @@ import { BiLike } from "react-icons/bi";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { AppDispatch } from "@/redux/store";
-import Ticket from "./Ticket";
 import { Routes } from "@/config/Routes";
 import { useDispatch } from "react-redux";
 import { switchRoute } from "@/redux/Slices/routeSwitch";
 import { toggleSidebar } from "@/redux/Slices/sidebar";
 import { MdOutlineSupportAgent } from "react-icons/md";
 import { TbLockAccess } from "react-icons/tb";
+import { LiaClipboardListSolid } from "react-icons/lia";
+import { useSession } from "next-auth/react";
+
 export default function Sidebar() {
   const Sidebar = useSelector((state: RootState) => state.sidebarSlice.value);
   const route = useSelector((state: RootState) => state.routeSwitch.route);
+  const session = useSession();
+  const role = session.data?.user?.user_type;
+
   const dispatch = useDispatch<AppDispatch>();
   return (
     <div
       className={`fixed ${
         Sidebar ? "right-0" : "right-[-100%]"
-      } top-0 h-screen w-[15rem] bg-[var(--background)]/70 backdrop-blur-md shadow-2xl transition-all z-10`}>
+      } top-0 h-screen w-[15rem] bg-[var(--background)]/70 backdrop-blur-md shadow-2xl transition-all z-20`}>
       <div className="flex flex-row items-center py-1 px-3">
         <Image
           alt="hominex logo"
@@ -34,8 +39,17 @@ export default function Sidebar() {
         />
         <span className="font-bold">هومینکس</span>
       </div>
-      <ul className="flex flex-col gap-4 pt-10 pl-5 | [&>*]:flex [&>*]:items-center [&>*]:gap-2 [&>*]:px-2 [&>*]:py-2 [&>*]:cursor-pointer">
-        {Routes.map((item, i) => (
+      <ul className="flex flex-col overflow-y-auto gap-4 pt-10 pl-5 | [&>*]:flex [&>*]:items-center [&>*]:gap-2 [&>*]:px-2 [&>*]:py-2 [&>*]:cursor-pointer">
+        {Routes.filter((item) => {
+          // if route has no access restriction, always show
+          if (!item.access) return true;
+
+          // only show items restricted to admin if user role is admin
+          if (item.access === "admin" && role === "admin") return true;
+
+          // hide otherwise
+          return false;
+        }).map((item, i) => (
           <li
             key={i}
             onClick={() => {
@@ -52,12 +66,12 @@ export default function Sidebar() {
             {i === 3 && <BiLike className="w-5 h-5 mx-2" />}
             {i === 4 && <TbLockAccess className="w-5 h-5 mx-2" />}
             {i === 5 && <MdOutlineSupportAgent className="w-5 h-5 mx-2" />}
+            {i === 6 && <LiaClipboardListSolid className="w-5 h-5 mx-2" />}
             {item.title}
           </li>
         ))}
       </ul>
-
-      <Ticket />
+      {/* <Ticket /> */}
     </div>
   );
 }

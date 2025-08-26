@@ -9,7 +9,7 @@ export default function Ticket() {
   const dispatch = useDispatch<AppDispatch>();
   return (
     <div
-      className="rounded-2xl p-3 bg-cover absolute bottom-10 mx-5 py-5 text-white font-bold flex flex-col gap-10 justify-center"
+      className="rounded-2xl p-3 bg-cover mt-10 bottom-10 mx-5 py-5 text-white font-bold flex flex-col gap-10 justify-center"
       style={{ backgroundImage: "url('/assets/svg/ticket_background.svg')" }}>
       <span className="text-shadow-lg">
         جهت ارتباط با پشتیبانی تیکت خود را ثبت نمایید.

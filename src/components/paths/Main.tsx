@@ -90,7 +90,7 @@ export default function Main() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <button
-          onClick={() => dispatch(switchRoute("management"))}
+          onClick={() => dispatch(switchRoute("properties"))}
           className="bg-blue-600 cursor-pointer text-white py-4 px-6 rounded-xl text-center hover:bg-blue-700 transition flex flex-row justify-center items-center gap-3">
           <CiCirclePlus /> ثبت آگهی جدید
         </button>

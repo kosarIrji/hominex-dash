@@ -10,7 +10,6 @@ import {
 } from "react-icons/vsc";
 import { url_v1 } from "@/config/urls";
 
-// TypeScript interfaces
 interface Consultant {
   id: number;
   name: string;
@@ -58,18 +57,16 @@ interface ApiResult {
   timestamp: string;
 }
 
-// Status styles for badges
 const statusStyles: { [key: string]: string } = {
-  pending: "bg-yellow-100 text-yellow-800",
-  approved: "bg-green-100 text-green-800",
-  rejected: "bg-red-100 text-red-800",
-  canceled: "bg-gray-100 text-gray-800",
+  pending: "bg-yellow-100 text-yellow-700",
+  approved: "bg-green-100 text-green-700",
+  rejected: "bg-red-100 text-red-700",
+  canceled: "bg-gray-200 text-gray-700",
 };
 
 const ConsultationsPage: React.FC = () => {
   const { data: session } = useSession();
   const [consultations, setConsultations] = useState<Consultation[]>([]);
-  // eslint-disable-next-line
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -142,95 +139,88 @@ const ConsultationsPage: React.FC = () => {
     alert(`اقدام دیگر برای درخواست مشاوره ${id} کلیک شد.`);
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <p className="text-lg text-gray-600 animate-pulse">
+          در حال بارگذاری...
+        </p>
+      </div>
+    );
+  }
+
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-red-100 text-red-800 p-4 rounded-lg shadow-md">
-          خطا: {error}
-        </div>
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <p className="text-lg text-red-600">خطا: {error}</p>
       </div>
     );
   }
 
   if (consultations.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-gray-100 text-gray-800 p-4 rounded-lg shadow-md">
-          هیچ درخواست مشاوره‌ای یافت نشد.
-        </div>
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <p className="text-lg text-gray-600">هیچ درخواست مشاوره‌ای یافت نشد.</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6  max-w-7xl md:p-6 py-3 space-y-10">
-      <div className="flex justify-end items-center mb-8">
-        <h1 className="md:text-2xl text-lg  font-bold text-gray-900 flex items-center gap-3">
-          درخواست‌های مشاوره ({consultations.length})
-          <VscGitPullRequestDraft className="w-7 h-7" />
-        </h1>
-      </div>
-      <div className="grid gap-6">
-        {consultations.map((consultation) => (
+    <div className="max-w-7xl mx-auto p-4 md:p-6 font-morabba">
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3 justify-end">
+        درخواست‌های مشاوره ({consultations.length})
+        <VscGitPullRequestDraft className="w-6 h-6" />
+      </h1>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {consultations.map((c) => (
           <div
-            key={consultation.id}
-            className="bg-white border border-gray-200 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="col-span-2">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    {consultation.full_name}
-                  </h2>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      statusStyles[consultation.status] ||
-                      "bg-gray-100 text-gray-800"
-                    }`}>
-                    {consultation.status_label}
-                  </span>
-                </div>
-                <div className="mt-2 text-gray-600 space-y-1">
-                  <p>
-                    <span className="font-medium">تماس:</span>{" "}
-                    {consultation.phone}
-                  </p>
-                  <p>
-                    <span className="font-medium">پیام:</span>{" "}
-                    {consultation.message.substring(0, 60)}...
-                  </p>
-                  <p>
-                    <span className="font-medium">ملک:</span>{" "}
-                    {consultation.property.title} ({consultation.property.city})
-                  </p>
-                  <p>
-                    <span className="font-medium">مشاور:</span>{" "}
-                    {consultation.consultant.name} (
-                    {consultation.consultant.company_name})
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col gap-2 md:items-end">
+            key={c.id}
+            className="bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow p-4">
+            <div className="flex justify-between items-start mb-3">
+              <h2 className="text-lg font-semibold text-gray-800">
+                {c.full_name}
+              </h2>
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  statusStyles[c.status]
+                }`}>
+                {c.status_label}
+              </span>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">
+              <span className="font-medium">تلفن:</span> {c.phone}
+            </p>
+            <p className="text-sm text-gray-600 mb-2">
+              <span className="font-medium">پیام:</span>{" "}
+              {c.message.substring(0, 50)}...
+            </p>
+            <p className="text-sm text-gray-600 mb-2">
+              <span className="font-medium">ملک:</span> {c.property.title} (
+              {c.property.city})
+            </p>
+            <p className="text-sm text-gray-600 mb-4">
+              <span className="font-medium">مشاور:</span> {c.consultant.name} (
+              {c.consultant.company_name})
+            </p>
+            <div className="flex flex-wrap gap-2 justify-end">
+              <button
+                onClick={() => handleDetails(c.id)}
+                className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-700 transition-colors">
+                <VscInfo className="w-4 h-4" /> جزئیات
+              </button>
+              {c.can_cancel && (
                 <button
-                  onClick={() => handleDetails(consultation.id)}
-                  className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                  <VscInfo className="w-5 h-5" />
-                  جزئیات
+                  onClick={() => handleDelete(c.id)}
+                  className="flex items-center gap-1 bg-red-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-red-700 transition-colors">
+                  <VscTrash className="w-4 h-4" /> حذف
                 </button>
-                {consultation.can_cancel && (
-                  <button
-                    onClick={() => handleDelete(consultation.id)}
-                    className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200">
-                    <VscTrash className="w-5 h-5" />
-                    حذف
-                  </button>
-                )}
-                <button
-                  onClick={() => handleAnotherAction(consultation.id)}
-                  className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200">
-                  <VscEllipsis className="w-5 h-5" />
-                  سایر
-                </button>
-              </div>
+              )}
+              <button
+                onClick={() => handleAnotherAction(c.id)}
+                className="flex items-center gap-1 bg-gray-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-gray-700 transition-colors">
+                <VscEllipsis className="w-4 h-4" /> سایر
+              </button>
             </div>
           </div>
         ))}

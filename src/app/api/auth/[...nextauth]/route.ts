@@ -1,10 +1,9 @@
 // app/api/auth/[...nextauth]/route.ts
-"use server";
 
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import type { NextAuthConfig } from "next-auth";
 import { AdapterUser } from "next-auth/adapters";
+import type { NextAuthConfig } from "next-auth";
 import { url } from "@/config/urls";
 
 interface AuthUser extends AdapterUser {
@@ -12,37 +11,6 @@ interface AuthUser extends AdapterUser {
   full_name: string;
   user_type: string;
   access_token: string;
-  refresh_token?: string;
-  expires_in?: number;
-}
-
-// Helper to refresh access token
-// eslint-disable-next-line
-async function refreshAccessToken(token: any) {
-  try {
-    const res = await fetch(url("/auth/refresh"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: token.access_token }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.success) throw data;
-
-    return {
-      ...token,
-      access_token: data.data.access_token,
-      accessTokenExpires: Date.now() + data.data.expires_in * 1000,
-      error: undefined,
-    };
-  } catch (error) {
-    console.error("Error refreshing access token:", error);
-    return {
-      ...token,
-      error: "RefreshAccessTokenError",
-    };
-  }
 }
 
 const authOptions: NextAuthConfig = {
@@ -55,7 +23,10 @@ const authOptions: NextAuthConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials): Promise<AuthUser | null> {
-        if (!credentials?.phone || !credentials?.password) return null;
+        if (!credentials?.phone || !credentials?.password) {
+          console.log("Missing credentials:", credentials);
+          return null;
+        }
 
         try {
           const res = await fetch(url("/auth/login"), {
@@ -66,20 +37,37 @@ const authOptions: NextAuthConfig = {
               password: credentials.password,
               login_type: "password",
             }),
+            redirect: "manual",
           });
 
-          const result = await res.json();
+          // console.log("Raw Response:", {
+          //   status: res.status,
+          //   statusText: res.statusText,
+          //   headers: Object.fromEntries(res.headers.entries()),
+          // });
 
-          if (!res.ok || !result.success) return null;
+          let result;
+          try {
+            result = await res.json();
+          } catch (parseError) {
+            console.error("Failed to parse JSON:", parseError);
+            return null;
+          }
 
-          const { access_token, user, expires_in } = result.data;
-          if (!user || !access_token) return null;
+          // console.log("Parsed Result:", result);
 
-          return {
-            ...user,
-            access_token,
-            expires_in,
-          } as AuthUser;
+          if (!res.ok || !result.success) {
+            console.error("Login failed:", { status: res.status, result });
+            return null;
+          }
+
+          const { access_token, user } = result.data;
+          if (!user || !access_token) {
+            console.error("Missing user or access_token:", result);
+            return null;
+          }
+
+          return { ...user, access_token } as AuthUser;
         } catch (error) {
           console.error("Authorize error:", error);
           return null;
@@ -97,50 +85,37 @@ const authOptions: NextAuthConfig = {
   },
   callbacks: {
     async jwt({ token, user }) {
-      // Initial login
+      // console.log("JWT Callback - User:", user, "Token:", token);
       if (user) {
         const u = user as AuthUser;
-        return {
-          ...token,
-          access_token: u.access_token,
-          accessTokenExpires: Date.now() + (u.expires_in || 3600) * 1000,
-          user: {
-            id: u.id || "",
-            phone: u.phone,
-            full_name: u.full_name,
-            user_type: u.user_type,
-          },
+        token.access_token = u.access_token;
+        token.user = {
+          id: u.id || "",
+          phone: u.phone,
+          full_name: u.full_name,
+          user_type: u.user_type,
         };
       }
-
-      // If token is not expired, return it
-      if (Date.now() < (token.accessTokenExpires as number)) {
-        return token;
-      }
-
-      // Token expired, refresh it
-      return await refreshAccessToken(token);
+      return token;
     },
-
     async session({ session, token }) {
+      // console.log("Session Callback - Token:", token, "Session:", session);
       if (token?.user) {
         session.user = token.user as AuthUser;
         session.user.access_token = token.access_token as string;
+      } else {
+        console.warn("No user data in token:", token);
       }
-      if (token?.error) {
-        session.error = token.error as string | undefined;
-      }
-
       return session;
     },
-
     async redirect({ baseUrl }) {
-      return baseUrl;
+      return baseUrl; // Ensures redirect to https://dash.hominow.ir
     },
   },
   secret: "bJNWiw4XmzEsjvFuUNDAM721g+yTm3oZu0Ot0jtSvsM=",
 };
 
 const { handlers } = NextAuth(authOptions);
+
 export const GET = handlers.GET;
 export const POST = handlers.POST;

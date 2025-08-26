@@ -2,6 +2,9 @@
 import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
 
 declare module "next-auth" {
+  /**
+   * Extend the default Session interface
+   */
   interface Session extends DefaultSession {
     user?: {
       id: string;
@@ -10,9 +13,11 @@ declare module "next-auth" {
       user_type: string;
       access_token: string;
     } & DefaultSession["user"];
-    error?: string; // optional error from token refresh
   }
 
+  /**
+   * Extend the default User interface
+   */
   interface User extends DefaultUser {
     id: string;
     phone: string;
@@ -23,13 +28,16 @@ declare module "next-auth" {
 }
 
 declare module "next-auth/jwt" {
+  /**
+   * Extend the JWT interface
+   */
   interface JWT {
-    id: string;
-    phone: string;
-    full_name: string;
-    user_type: string;
     access_token: string;
-    accessTokenExpires?: number; // expiration timestamp in ms
-    error?: string; // optional error from refresh
+    user: {
+      id: string;
+      phone: string;
+      full_name: string;
+      user_type: string;
+    };
   }
 }

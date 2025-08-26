@@ -3,7 +3,7 @@ import React from "react";
 import Form from "../UI/Form";
 import { useState } from "react";
 import { FaRegListAlt } from "react-icons/fa";
-import CreatedProperties from "../UI/CreatedProperties";
+import AddedProperties from "../UI/AddedProperties";
 export default function Management() {
   // const [mapSelection, setMapSelection] = useState<string[]>([]);
   const [_switch, _setSwitch] = useState<boolean>(false);
@@ -34,7 +34,7 @@ export default function Management() {
         </div>
       </div>
       <div className="flex flex-row items-center justify-between">
-        {!_switch ? <Form /> : <CreatedProperties />}
+        {!_switch ? <Form /> : <AddedProperties />}
       </div>
     </div>
   );
