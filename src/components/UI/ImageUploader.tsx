@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Star } from "lucide-react";
 import Image from "next/image";
 import { VscCloudUpload } from "react-icons/vsc";
 
@@ -12,36 +12,36 @@ interface ImageUploaderProps {
 export default function ImageUploader({
   onSelectedImages,
 }: ImageUploaderProps) {
-  const [images, setImages] = useState<string[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [images, setImages] = useState<{ file: File; url: string }[]>([]);
 
   const handleImageSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
-    const filesArray = Array.from(e.target.files).slice(0, 20); // Limit to 20 images
-    console.log("ImageUploader selected files:", filesArray); // Debug log
-    const imageUrls = filesArray.map((file) => URL.createObjectURL(file));
+    const filesArray = Array.from(e.target.files).slice(0, 20); // limit 20
+    const newImages = filesArray.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
 
-    // Append new images and files
-    setImages((prev) => [...prev, ...imageUrls]);
-    setSelectedFiles((prev) => [...prev, ...filesArray]);
+    setImages((prev) => [...prev, ...newImages]);
 
-    // Trigger onSelectedImages to sync with parent
+    // pass event back to parent
     onSelectedImages(e);
   };
 
-  const removeImage = (src: string) => {
-    setImages((prev) => prev.filter((img) => img !== src));
-    setSelectedFiles((prev) =>
-      prev.filter((_, idx) => URL.createObjectURL(prev[idx]) !== src)
-    );
-    URL.revokeObjectURL(src); // Cleanup memory
+  const removeImage = (url: string) => {
+    setImages((prev) => {
+      const updated = prev.filter((img) => img.url !== url);
+      return updated;
+    });
+
+    URL.revokeObjectURL(url); // cleanup
   };
 
-  // Cleanup URLs on unmount to prevent memory leaks
+  // cleanup when unmounting
   useEffect(() => {
     return () => {
-      images.forEach((url) => URL.revokeObjectURL(url));
+      images.forEach((img) => URL.revokeObjectURL(img.url));
     };
   }, [images]);
 
@@ -64,27 +64,33 @@ export default function ImageUploader({
       />
 
       <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-        {images.map((src, idx) => (
+        {images.map((img, idx) => (
           <div key={idx} className="w-32 h-32 relative group">
             <Image
               width={100}
               height={100}
-              src={src}
+              src={img.url}
               alt={`preview ${idx}`}
               className="w-full h-full object-cover rounded-lg shadow"
             />
             <button
               type="button"
-              onClick={() => removeImage(src)}
-              className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition">
+              onClick={() => removeImage(img.url)}
+              className="absolute top-1 right-1 cursor-pointer bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition">
               <X size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => removeImage(img.url)}
+              className="absolute bottom-1 cursor-pointer left-1 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition">
+              <Star size={16} />
             </button>
           </div>
         ))}
       </div>
+
       <p className="text-xs text-gray-500 mt-2">
-        {selectedFiles.length} تصویر انتخاب شده است (حداکثر ۵ مگابایت برای هر
-        تصویر)
+        {images.length} تصویر انتخاب شده است (حداکثر ۵ مگابایت برای هر تصویر)
       </p>
     </div>
   );

@@ -10,7 +10,7 @@ export default function Messages() {
   );
 
   return (
-    <ul className="bg-white/30 backdrop-blur-2xl absolute bottom-[-11rem] left-[0rem] border-1 border-gray-500 z-10 shadow-gray-500 shadow-lg rounded-lg max-w-3xl gap-5 flex flex-col w-[13rem] h-[10rem] overflow-y-scroll px-2 py-7">
+    <ul className="bg-white/30 backdrop-blur-2xl absolute bottom-[-11rem] left-[-5.5rem] sm:left-0 border-1 border-gray-500 z-10 shadow-gray-500 shadow-lg rounded-lg max-w-3xl gap-5 flex flex-col w-[13rem] h-[10rem] overflow-y-scroll px-2 py-7">
       {loading ? (
         <span className="w-full text-center text-gray-400">
           در حال بارگذاری...

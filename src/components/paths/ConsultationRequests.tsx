@@ -2,12 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import {
-  VscGitPullRequestDraft,
-  VscInfo,
-  VscTrash,
-  VscEllipsis,
-} from "react-icons/vsc";
+import { X } from "lucide-react";
+import { VscGitPullRequestDraft, VscInfo, VscTrash } from "react-icons/vsc";
 import { url_v1 } from "@/config/urls";
 
 interface Consultant {
@@ -57,6 +53,22 @@ interface ApiResult {
   timestamp: string;
 }
 
+interface ConsultationDetails {
+  id: number;
+  full_name: string;
+  phone: string;
+  message: string;
+  preferred_contact_method: string;
+  preferred_contact_time: string;
+  status: string;
+  status_label: string;
+  consultant_notes: string | null;
+  consultant: Consultant;
+  property: Property;
+  created_at: string;
+  updated_at: string;
+}
+
 const statusStyles: { [key: string]: string } = {
   pending: "bg-yellow-100 text-yellow-700",
   approved: "bg-green-100 text-green-700",
@@ -69,6 +81,11 @@ const ConsultationsPage: React.FC = () => {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedConsultation, setSelectedConsultation] =
+    useState<ConsultationDetails | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
+  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState<boolean>(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchConsultations() {
@@ -99,7 +116,7 @@ const ConsultationsPage: React.FC = () => {
 
   const handleDetails = async (id: number) => {
     try {
-      const res = await fetch(url_v1(`/user/consultation-requests${id}`), {
+      const res = await fetch(url_v1(`/user/consultation-requests/${id}`), {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -108,35 +125,53 @@ const ConsultationsPage: React.FC = () => {
       });
       if (!res.ok) throw new Error(`خطا در دریافت جزئیات: ${res.status}`);
       const data = await res.json();
-      alert(`جزئیات درخواست مشاوره ${id}:\n${JSON.stringify(data, null, 2)}`);
+      if (!data.success)
+        throw new Error(data.message || "خطای ناشناخته در جزئیات");
+      setSelectedConsultation(data.data);
+      setIsPopupOpen(true);
     } catch (error) {
       alert(`خطا در دریافت جزئیات: ${(error as Error).message}`);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (
-      !confirm("آیا مطمئن هستید که می‌خواهید این درخواست مشاوره را حذف کنید؟")
-    )
-      return;
+    setDeleteId(id);
+    setIsDeletePopupOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+
     try {
-      const res = await fetch(url_v1(`/user/consultation-requests${id}`), {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.user?.access_token}`,
-        },
-      });
+      const res = await fetch(
+        url_v1(`/user/consultation-requests/${deleteId}`),
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.user?.access_token}`,
+          },
+        }
+      );
       if (!res.ok) throw new Error(`خطا در حذف درخواست: ${res.status}`);
-      setConsultations((prev) => prev.filter((c) => c.id !== id));
-      alert(`درخواست مشاوره ${id} با موفقیت حذف شد.`);
+      setConsultations((prev) => prev.filter((c) => c.id !== deleteId));
+      alert(`درخواست مشاوره ${deleteId} با موفقیت حذف شد.`);
     } catch (error) {
       alert(`خطا در حذف درخواست مشاوره: ${(error as Error).message}`);
+    } finally {
+      setIsDeletePopupOpen(false);
+      setDeleteId(null);
     }
   };
 
-  const handleAnotherAction = (id: number) => {
-    alert(`اقدام دیگر برای درخواست مشاوره ${id} کلیک شد.`);
+  const cancelDelete = () => {
+    setIsDeletePopupOpen(false);
+    setDeleteId(null);
+  };
+
+  const closePopup = () => {
+    setIsPopupOpen(false);
+    setSelectedConsultation(null);
   };
 
   if (loading) {
@@ -172,7 +207,9 @@ const ConsultationsPage: React.FC = () => {
         <VscGitPullRequestDraft className="w-6 h-6" />
       </h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        dir="rtl">
         {consultations.map((c) => (
           <div
             key={c.id}
@@ -216,15 +253,139 @@ const ConsultationsPage: React.FC = () => {
                   <VscTrash className="w-4 h-4" /> حذف
                 </button>
               )}
-              <button
+              {/* <button
                 onClick={() => handleAnotherAction(c.id)}
                 className="flex items-center gap-1 bg-gray-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-gray-700 transition-colors">
                 <VscEllipsis className="w-4 h-4" /> سایر
-              </button>
+              </button> */}
             </div>
           </div>
         ))}
       </div>
+
+      {isPopupOpen && selectedConsultation && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
+          onClick={closePopup}
+          dir="rtl">
+          <div
+            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md sm:max-w-lg md:max-w-xl max-h-[90vh] overflow-y-auto relative"
+            onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={closePopup}
+              className="absolute top-4 left-4 text-gray-600 hover:text-gray-800">
+              <X className="w-6 h-6" />
+            </button>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              جزئیات درخواست مشاوره
+            </h2>
+            <div className="space-y-3 text-sm text-gray-700">
+              <p>
+                <span className="font-medium">شناسه:</span>{" "}
+                {selectedConsultation.id}
+              </p>
+              <p>
+                <span className="font-medium">نام کامل:</span>{" "}
+                {selectedConsultation.full_name}
+              </p>
+              <p>
+                <span className="font-medium">تلفن:</span>{" "}
+                {selectedConsultation.phone}
+              </p>
+              <p>
+                <span className="font-medium">پیام:</span>{" "}
+                {selectedConsultation.message}
+              </p>
+              <p>
+                <span className="font-medium">روش تماس ترجیحی:</span>{" "}
+                {selectedConsultation.preferred_contact_method}
+              </p>
+              <p>
+                <span className="font-medium">زمان تماس ترجیحی:</span>{" "}
+                {selectedConsultation.preferred_contact_time}
+              </p>
+              <p>
+                <span className="font-medium">وضعیت:</span>{" "}
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    statusStyles[selectedConsultation.status]
+                  }`}>
+                  {selectedConsultation.status_label}
+                </span>
+              </p>
+              <p>
+                <span className="font-medium">یادداشت‌های مشاور:</span>{" "}
+                {selectedConsultation.consultant_notes || "بدون یادداشت"}
+              </p>
+              <p>
+                <span className="font-medium">مشاور:</span>{" "}
+                {selectedConsultation.consultant.name} (
+                {selectedConsultation.consultant.company_name})
+              </p>
+              <p>
+                <span className="font-medium">ملک:</span>{" "}
+                {selectedConsultation.property.title} (
+                {selectedConsultation.property.city})
+              </p>
+              <p>
+                <span className="font-medium">نوع ملک:</span>{" "}
+                {selectedConsultation.property.property_type}
+              </p>
+              <p>
+                <span className="font-medium">قیمت:</span>{" "}
+                {selectedConsultation.property.formatted_price}
+              </p>
+              <p>
+                <span className="font-medium">ایجاد شده در:</span>{" "}
+                {new Date(selectedConsultation.created_at).toLocaleString(
+                  "fa-IR"
+                )}
+              </p>
+              <p>
+                <span className="font-medium">به‌روزرسانی شده در:</span>{" "}
+                {new Date(selectedConsultation.updated_at).toLocaleString(
+                  "fa-IR"
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isDeletePopupOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
+          onClick={cancelDelete}
+          dir="rtl">
+          <div
+            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm sm:max-w-md relative"
+            onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={cancelDelete}
+              className="absolute top-4 left-4 text-gray-600 hover:text-gray-800">
+              <X className="w-6 h-6" />
+            </button>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              تأیید حذف درخواست
+            </h2>
+            <p className="text-sm text-gray-700 mb-6">
+              آیا مطمئن هستید که می‌خواهید این درخواست مشاوره را حذف کنید؟
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={confirmDelete}
+                className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 transition-colors">
+                بله
+              </button>
+              <button
+                onClick={cancelDelete}
+                className="bg-gray-600 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-700 transition-colors">
+                خیر
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -96,7 +96,7 @@ export default function Main() {
         </button>
         <button
           onClick={() => dispatch(switchRoute("account"))}
-          className="bg-gray-100 cursor-pointer text-gray-700 py-4 px-6 rounded-xl text-center hover:bg-gray-200 transition flex flex-row justify-center items-center gap-3">
+          className="bg-gray-100 shadow-lg shadow-gray-400 cursor-pointer text-gray-700 py-4 px-6 rounded-xl text-center hover:bg-gray-200 transition flex flex-row justify-center items-center gap-3">
           <GoGear /> ویرایش اطلاعات حساب
         </button>
       </div>

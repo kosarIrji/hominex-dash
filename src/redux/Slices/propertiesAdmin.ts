@@ -3,8 +3,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { url_v1 } from "@/config/urls"; // adjust import path
-import { HtmlProps } from "next/dist/shared/lib/html-context.shared-runtime";
-import { ja } from "date-fns/locale";
 
 // --------------------------------------
 // Types

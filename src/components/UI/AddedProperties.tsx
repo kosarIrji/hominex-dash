@@ -138,6 +138,51 @@ export default function AddedProperties() {
     }
   }, [filter, properties]);
 
+  // ---------------------------------------
+
+  const [propertyImages, setPropertyImages] = useState<Record<number, string>>(
+    {}
+  );
+
+  useEffect(() => {
+    async function fetchImagesForAll() {
+      if (!token) return;
+
+      const imagesMap: Record<number, string> = {};
+
+      await Promise.all(
+        filteredProperties.map(async (property) => {
+          try {
+            const res = await fetch(
+              url_v1(`/user/properties/${property.id}/images`),
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                // CORS-related settings
+                mode: "cors", // default for cross-origin requests
+                cache: "no-cache",
+              }
+            );
+            const data = await res.json();
+            // Take the first image in the array
+            const firstImage = await data.data?.images?.[0]?.image_url;
+            imagesMap[property.id] = await firstImage;
+          } catch (err) {
+            if (err) imagesMap[property.id] = "/assets/img/not.jpg"; // fallback on error
+          }
+        })
+      );
+
+      setPropertyImages(imagesMap);
+    }
+
+    fetchImagesForAll();
+  }, [filteredProperties, token]);
+
+  // ---------------------------------------
   // Handle remove property
   const handleRemove = async (id: number) => {
     if (!token) {
@@ -153,8 +198,7 @@ export default function AddedProperties() {
           Authorization: `Bearer ${token}`,
         },
       });
-      const response = await res.json();
-      console.log("Delete Property Response:", response); // Debug response
+
       if (!res.ok) {
         throw new Error(`خطا در حذف ملک: ${res.status}`);
       }
@@ -195,10 +239,6 @@ export default function AddedProperties() {
     );
   }
 
-  // if (status !== "authenticated" || !token) {
-  //   return signOut();
-  // }
-
   if (error) {
     return <div className="p-4 text-center text-red-500">{error}</div>;
   }
@@ -207,7 +247,7 @@ export default function AddedProperties() {
     <div dir="rtl" className="max-w-7xl w-full mx-auto md:p-6 py-3 space-y-6">
       <div className="flex flex-col items-center justify-between md:flex-row">
         <h1 className="md:text-2xl text-lg font-semibold mb-4 md:mb-0 text-gray-900">
-          املاک اضافه شده
+          {/* املاک اضافه شده */}
         </h1>
         <div className="flex flex-wrap sm:flex-nowrap gap-2">
           <button
@@ -269,6 +309,7 @@ export default function AddedProperties() {
               key={property.id}
               property={property}
               handleRemove={handleRemove}
+              image={propertyImages[property.id] || "/assets/img/not.jpg"}
             />
           ))}
         </div>

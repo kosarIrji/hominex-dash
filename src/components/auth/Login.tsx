@@ -12,14 +12,14 @@ import { errorToast, successToast } from "@/config/Toasts";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { IoEyeOutline } from "react-icons/io5";
-import { IoEyeOffOutline } from "react-icons/io5";
+import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
   const [phone, setPhone] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [passwordType, setPasswordType] = useState<string>("password");
+  const [isLoading, setIsLoading] = useState<boolean>(false); // New loading state
   const router = useRouter();
   const { data: session, status } = useSession();
 
@@ -33,12 +33,15 @@ export default function Login() {
   // Handle form submission
   const handleFormSubmit = async () => {
     try {
+      setIsLoading(true); // Show spinner
       // Validate the inputs
       const formData = { phone, password };
       const { error, value } = loginFormSchema.validate(formData);
       if (error) {
         const errorMessage = error.details.map((err) => err.message).join(", ");
-        return errorToast(errorMessage);
+        errorToast(errorMessage);
+        setIsLoading(false); // Hide spinner on validation error
+        return;
       }
 
       // Send validated request to NextAuth
@@ -51,6 +54,7 @@ export default function Login() {
 
       if (res?.error) {
         errorToast(`خطا در ورود: ${res.error}`);
+        setIsLoading(false); // Hide spinner on error
         return;
       }
 
@@ -61,14 +65,16 @@ export default function Login() {
           if (status === "authenticated" || session) {
             router.push(res.url || "/");
           }
-          console.log(status);
+          setIsLoading(false); // Hide spinner after redirect
         }, 1000);
       } else {
         errorToast("خطا در ورود. لطفاً دوباره تلاش کنید.");
+        setIsLoading(false); // Hide spinner on failure
       }
     } catch (e) {
       console.error("Login Error:", e);
       errorToast("خطای غیرمنتظره رخ داده است.");
+      setIsLoading(false); // Hide spinner on unexpected error
     }
   };
 
@@ -132,17 +138,15 @@ export default function Login() {
           </label>
           <div className="flex justify-center items-center">
             <input
-              className="bg-gray-200 pl-15 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
+              className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
               type="text"
               dir="ltr"
               name="phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               maxLength={11}
+              placeholder="09..."
             />
-            <span className="absolute left-3 border-r-2 pr-3 font-bold text-gray-700">
-              98+
-            </span>
           </div>
         </div>
 
@@ -185,10 +189,35 @@ export default function Login() {
         <div className="mt-8 flex gap-2 [&>*]:h-13">
           <button
             onClick={() => handleFormSubmit()}
-            type="submit"
-            className="bg-gray-700 text-white font-bold py-2 px-4 w-full rounded hover:bg-gray-600 flex justify-center items-center gap-1 hover:gap-5 transition-all cursor-pointer">
-            ورود
-            <IoIosArrowRoundBack className="" />
+            disabled={isLoading}
+            className={`relative bg-gray-700 text-white font-bold py-2 px-4 w-full rounded flex justify-center items-center gap-1 hover:gap-5 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed`}>
+            {isLoading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                در حال ورود...
+              </>
+            ) : (
+              <>
+                ورود
+                <IoIosArrowRoundBack className="" />
+              </>
+            )}
           </button>
           <button
             type="button"

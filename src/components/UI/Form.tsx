@@ -241,6 +241,8 @@ export default function SubmitPropertyPage() {
     { value: 3, label: "مغازه" },
     { value: 4, label: "دفتر کار" },
     { value: 5, label: "زمین" },
+    { value: 6, label: "پاساژ" },
+    { value: 7, label: "مجتمع" },
   ];
 
   const [formData, setFormData] = useState<FormData>({
@@ -342,9 +344,14 @@ export default function SubmitPropertyPage() {
 
   const onSelectedImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const files = Array.from(e.target.files).slice(0, 20); // Limit to 20 images
-      setSelectedImages(files);
-      console.log("Selected images:", files); // Debug log
+      const files = Array.from(e.target.files).slice(0, 20);
+      setSelectedImages((prev) => {
+        // Filter out duplicates by name and size
+        const existing = new Set(prev.map((f) => f.name + f.size));
+        const newFiles = files.filter((f) => !existing.has(f.name + f.size));
+        return [...prev, ...newFiles].slice(0, 20); // Limit to 20 total
+      });
+      console.log("Selected images:", selectedImages);
     }
   };
 
@@ -520,7 +527,6 @@ export default function SubmitPropertyPage() {
     const cleanedPayload = Object.fromEntries(
       Object.entries(payload).filter(([_, value]) => value !== undefined)
     );
-    console.log(cleanedPayload);
 
     try {
       // Step 1: Create the property
@@ -558,7 +564,7 @@ export default function SubmitPropertyPage() {
         }
       }
 
-      const propertyId = result.data?.property?.id;
+      const propertyId = result.data?.id;
       if (!propertyId) {
         errorToast("شناسه ملک دریافت نشد.");
         return;
@@ -571,29 +577,29 @@ export default function SubmitPropertyPage() {
         return;
       }
 
-      // Step 3: Update property with image URLs
-      const updateResponse = await fetch(
-        url_v1(`/user/properties/${propertyId}`),
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ images: imageUrls }),
-        }
-      );
+      // Step 3: Update property with image URLs //! UPDATE'S NOT NESSECARY
+      // const updateResponse = await fetch(
+      //   url_v1(`/user/properties/${propertyId}`),
+      //   {
+      //     method: "PATCH",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       Authorization: `Bearer ${token}`,
+      //     },
+      //     body: JSON.stringify({ images: imageUrls }),
+      //   }
+      // );
 
-      const updateResult = await updateResponse.json();
-      if (!updateResponse.ok) {
-        if (updateResponse.status === 401) {
-          errorToast("احراز هویت ناموفق - لطفاً دوباره وارد شوید.");
-          signOut();
-          return;
-        }
-        errorToast(updateResult.message || "خطا در به‌روزرسانی تصاویر ملک");
-        return;
-      }
+      // const updateResult = await updateResponse.json();
+      // if (!updateResponse.ok) {
+      //   if (updateResponse.status === 401) {
+      //     errorToast("احراز هویت ناموفق - لطفاً دوباره وارد شوید.");
+      //     signOut();
+      //     return;
+      //   }
+      //   errorToast(updateResult.message || "خطا در به‌روزرسانی تصاویر ملک");
+      //   return;
+      // }
 
       successToast("آگهی با موفقیت ثبت شد.");
       setFormData({
@@ -698,22 +704,6 @@ export default function SubmitPropertyPage() {
             <p className="text-red-500 text-sm mt-1">{errors.title}</p>
           )}
         </div>
-        <div>
-          <label
-            htmlFor="description"
-            className="block text-sm font-medium mb-1">
-            توضیحات
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
-            placeholder="توضیحات ملک را وارد کنید"
-            rows={4}
-          />
-        </div>
 
         {/* Transaction Type */}
         <div>
@@ -743,7 +733,9 @@ export default function SubmitPropertyPage() {
         </div>
 
         {/* Price Fields */}
-        {formData.transaction_type === "sale" && (
+        {["sale", "construction_partnership", "presale", "exchange"].includes(
+          formData.transaction_type
+        ) && (
           <div>
             <label
               htmlFor="total_price"
@@ -761,6 +753,7 @@ export default function SubmitPropertyPage() {
             />
           </div>
         )}
+
         {formData.transaction_type === "rent_mortgage" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -856,7 +849,7 @@ export default function SubmitPropertyPage() {
           </div>
           <div className="sm:col-span-2">
             <label htmlFor="address" className="block text-sm font-medium mb-1">
-              آدرس کامل
+              آدرس کامل <span className="text-yellow-600">( اختیاری )</span>
             </label>
             <input
               id="address"
@@ -864,12 +857,16 @@ export default function SubmitPropertyPage() {
               type="text"
               value={formData.address}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
+              className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300 mb-5"
               placeholder="مثال: خیابان سعادت آباد، خیابان کاج، پلاک 15"
             />
             {errors.address && (
               <p className="text-red-500 text-sm mt-1">{errors.address}</p>
             )}
+            <MapComponent
+              mapSelection={mapSelection}
+              setMapSelection={setMapSelection}
+            />
           </div>
         </div>
 
@@ -896,7 +893,7 @@ export default function SubmitPropertyPage() {
               <label
                 htmlFor="building_area"
                 className="block text-sm font-medium mb-1">
-                متراژ بنا (متر)
+                متراژ زیربنا (متر)
               </label>
               <input
                 id="building_area"
@@ -1087,6 +1084,7 @@ export default function SubmitPropertyPage() {
                   <option value="south">جنوبی</option>
                   <option value="east">شرقی</option>
                   <option value="west">غربی</option>
+                  <option value="corner">دونبش</option>
                 </select>
               </div>
               {isResidentialOrOffice && (
@@ -1147,7 +1145,7 @@ export default function SubmitPropertyPage() {
                 <option value="">انتخاب کنید</option>
                 <option value="street">خیابان</option>
                 <option value="alley">کوچه</option>
-                <option value="garden_view">باغ</option>
+                <option value="garden_view">حیاط</option>
               </select>
             </div>
 
@@ -1293,16 +1291,6 @@ export default function SubmitPropertyPage() {
                     className="ml-2"
                   />
                   جکوزی
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="has_separate_access"
-                    checked={formData.has_separate_access || false}
-                    onChange={handleBooleanChange}
-                    className="ml-2"
-                  />
-                  راه جداگانه
                 </label>
               </div>
             </div>
@@ -1491,12 +1479,24 @@ export default function SubmitPropertyPage() {
               ))}
             </div>
           </div>
+          <div>
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium mb-1">
+              توضیحات
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
+              placeholder="توضیحات ملک را وارد کنید"
+              rows={4}
+            />
+          </div>
         </div>
 
-        <MapComponent
-          mapSelection={mapSelection}
-          setMapSelection={setMapSelection}
-        />
         <button
           type="submit"
           disabled={isSubmitting}

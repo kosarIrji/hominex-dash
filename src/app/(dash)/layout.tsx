@@ -18,16 +18,18 @@ export default function RootLayout({
 }>) {
   return (
     <>
-      <Wrapper>
-        <Session>
-          <FetchLayer>
-            <Nav />
-            <Sidebar />
-            {children}
-          </FetchLayer>
-        </Session>
-      </Wrapper>
-      <Socials />
+      <div className="bg-[url('/assets/img/_login2.jpg')] bg-cover w-screen h-screen">
+        <Wrapper>
+          <Session>
+            <FetchLayer>
+              <Nav />
+              <Sidebar />
+              {children}
+            </FetchLayer>
+          </Session>
+        </Wrapper>
+        <Socials />
+      </div>
     </>
   );
 }

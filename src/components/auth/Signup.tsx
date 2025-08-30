@@ -72,7 +72,6 @@ export default function Signup() {
         setShowOTP(true);
       } else {
         errorToast(res.message);
-        console.log(res);
       }
       // const data = await response.json();
       // get the code
@@ -176,7 +175,7 @@ export default function Signup() {
             </label>
             <div className="flex justify-center items-center">
               <input
-                className="bg-gray-200 pl-15 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
+                className="bg-gray-200 text-gray-700 focus:outline-none focus:shadow-outline border border-gray-300 rounded py-2 px-4 block w-full appearance-none"
                 type="text"
                 name="phone"
                 value={form.phone}
@@ -185,9 +184,6 @@ export default function Signup() {
                 maxLength={11}
                 placeholder="09..."
               />
-              <span className="absolute left-3 border-r-2 pr-3 font-bold text-gray-700">
-                98+
-              </span>
             </div>
           </div>
 

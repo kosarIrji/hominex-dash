@@ -13,12 +13,10 @@ import { signOut } from "next-auth/react";
 import { successToast } from "@/config/Toasts";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { useSession } from "next-auth/react";
-import { concatWithPlus } from "@/lib/concatWithPlus";
 import { url } from "@/config/urls";
 export default function Nav() {
   //   const [toggleSidebar, setToggleSidebar] = useState(false);
   const Sidebar = useSelector((state: RootState) => state.sidebarSlice.value);
-  const client = useSelector((state: RootState) => state.authSlice.client);
   const session = useSession();
   const dispatch = useDispatch<AppDispatch>();
   const [toggleMessages, setToggleMessages] = useState<boolean>(false);
@@ -31,14 +29,13 @@ export default function Nav() {
     try {
       successToast("درحال خروج از حساب");
       setTimeout(async () => {
-        const res = await fetch(url("/auth/logout"), {
+        await fetch(url("/auth/logout"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.data?.user?.access_token}`,
           },
         });
-        console.log(res);
         signOut();
       }, 2000);
     } catch (e) {
@@ -60,9 +57,11 @@ export default function Nav() {
             alt="تصویر پروفایل"
             width={40}
             height={40}
-            src={client.profile_picture + concatWithPlus(client.full_name)}
+            unoptimized={true}
+            src={"/assets/img/logo.png"}
             className="rounded-full border-3 w-10 h-10 border-blue-500"
           />
+          {/* client.profile_picture + concatWithPlus(client.full_name) */}
           <svg
             className="w-4 h-4 absolute bottom-[-0.2rem] text-blue-600"
             aria-hidden="true"

@@ -24,7 +24,9 @@ export default function AuthLayout({
   return (
     <div
       className="relative h-screen w-screen bg-gray-100 bg-cover"
-      style={{ backgroundImage: "url('/assets/img/_login.jpg')" }}>
+      style={{
+        backgroundImage: "url('/assets/img/_login2.jpg')",
+      }}>
       <Wrapper>{children}</Wrapper>
       <span className="fixed bottom-3 right-3 text-white">v1.0</span>
     </div>

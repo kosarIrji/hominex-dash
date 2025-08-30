@@ -31,13 +31,6 @@ export default function Liked() {
     (state: RootState) => state.favorites
   );
 
-  // Log session for debugging
-  useEffect(() => {
-    console.log("Session Status:", status);
-    console.log("Session Data:", session);
-    console.log("Access Token:", session?.user?.access_token);
-  }, [session, status]);
-
   // Fetch favorites when authenticated
   useEffect(() => {
     if (status === "authenticated" && session?.user?.access_token) {
@@ -152,6 +145,7 @@ export default function Liked() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {likedProperties.map((property) => (
             <LIkedCard
+              image=""
               property={property}
               key={property.id}
               handleRemove={handleRemove}

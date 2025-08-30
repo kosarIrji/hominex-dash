@@ -1,12 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    unoptimized: true, // or remove if you want Next optimization
     remotePatterns: [
       {
         protocol: "https",
         hostname: "api-hominex.ir",
         port: "",
-        pathname: "/**",
+        pathname: "/storage/properties/**",
       },
       {
         protocol: "https",

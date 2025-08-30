@@ -24,7 +24,6 @@ const authOptions: NextAuthConfig = {
       },
       async authorize(credentials): Promise<AuthUser | null> {
         if (!credentials?.phone || !credentials?.password) {
-          console.log("Missing credentials:", credentials);
           return null;
         }
 

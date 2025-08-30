@@ -28,6 +28,7 @@ type Property = {
 type PropertyCardProps = {
   property: Property;
   handleRemove: (id: number) => void;
+  image: string;
 };
 
 export function LIkedCard({ property, handleRemove }: PropertyCardProps) {
@@ -36,6 +37,7 @@ export function LIkedCard({ property, handleRemove }: PropertyCardProps) {
       <Image
         width={1000}
         height={1000}
+        unoptimized={true}
         src={property.image || "/assets/img/not.jpg"}
         alt={property.name || "تصویر آگهی"}
         className="w-full h-48 object-cover"
@@ -97,7 +99,11 @@ export function LIkedCard({ property, handleRemove }: PropertyCardProps) {
   );
 }
 
-export function PropertyCard({ property, handleRemove }: PropertyCardProps) {
+export function PropertyCard({
+  property,
+  handleRemove,
+  image,
+}: PropertyCardProps) {
   // Determine badge styling based on status
   const getStatusBadgeStyles = (status?: string) => {
     switch (status) {
@@ -111,13 +117,21 @@ export function PropertyCard({ property, handleRemove }: PropertyCardProps) {
         return "bg-gray-100 text-gray-800";
     }
   };
+  function convertPropertyPath(path: string): string {
+    const baseUrl = "https://hominow.ir/estates";
+    // Remove leading "/properties"
+    const newPath = path.replace(/^\/properties/, "");
+    return `${baseUrl}${newPath}`;
+  }
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden">
       <Image
         width={1000}
         height={1000}
-        src={property.image || "/assets/img/not.jpg"}
+        src={image}
+        loading="lazy"
+        unoptimized={true}
         alt={property.name || "تصویر آگهی"}
         className="w-full h-48 object-cover"
       />
@@ -178,13 +192,13 @@ export function PropertyCard({ property, handleRemove }: PropertyCardProps) {
             <VscTrash className="w-4 h-4" /> حذف
           </button>
           <a
-            href={property.url}
+            href={convertPropertyPath(property.url)}
             className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors text-sm w-full sm:w-auto">
             <VscInfo className="w-4 h-4" /> مشاهده ملک
           </a>
           <a
-            href={`/properties/edit/${property.id}`}
-            className="flex items-center gap-1 bg-gray-600 text-white px-3 py-1.5 rounded-md hover:bg-gray-700 transition-colors text-sm w-full sm:w-auto">
+            href={`/edit/${property.id}`}
+            className="flex items-center gap-1 opacity-50 bg-gray-600 text-white px-3 py-1.5 rounded-md hover:bg-gray-700 transition-colors text-sm w-full sm:w-auto">
             <VscEdit className="w-4 h-4" /> ویرایش
           </a>
         </div>

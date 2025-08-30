@@ -39,14 +39,14 @@ export default function Page() {
   const route = useSelector((state: RootState) => state.routeSwitch.route);
 
   return (
-    <div dir="ltr" className="md:px-5 px-0 py-3">
+    <div dir="ltr" className="md:px-5 px-0 py-3 ">
       <span className="text-[12px] md:pl-0 pl-5 flex flex-row items-center gap-2">
         <TbRouteAltRight className="text-[15px]" />{" "}
         <span className="text-gray-500">Dashboard /</span>
         {route === "dashboard" ? "" : route}
       </span>
       <div
-        className="bg-[var(--background)] my-1 shadow-2xl md:rounded-md p-5 overflow-x-hidden overflow-y-auto"
+        className="bg-[var(--background)]/70 backdrop-blur-md my-1 shadow-2xl md:rounded-md p-5 overflow-x-hidden overflow-y-auto"
         style={{ height: "calc(100vh - 150px)" }}>
         {route === "dashboard" && <Main />}
         {route === "ticket" && <Tickets />}
