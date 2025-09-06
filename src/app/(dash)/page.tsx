@@ -5,7 +5,7 @@ import { TbRouteAltRight } from "react-icons/tb";
 import dynamic from "next/dynamic";
 import LoadingSpinner from "@/components/UI/LoadingSpinner";
 import AllProperties from "@/components/paths/AllProperties";
-
+import Promotions from "@/components/paths/Promotions";
 // main routes
 const Main = dynamic(() => import("../../components/paths/Main"), {
   loading: () => <LoadingSpinner />,
@@ -56,6 +56,7 @@ export default function Page() {
         {route === "UsersManagement" && <UsersManagement />}
         {route === "consultation" && <ConsultationRequests />}
         {route === "allProperties" && <AllProperties />}
+        {route === "promotions" && <Promotions />}
       </div>
     </div>
   );

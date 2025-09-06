@@ -53,7 +53,7 @@ export default function Login() {
       });
 
       if (res?.error) {
-        errorToast(`خطا در ورود: ${res.error}`);
+        errorToast(`خطا در ورود: شماره / رمز اشتباه میباشد.`);
         setIsLoading(false); // Hide spinner on error
         return;
       }

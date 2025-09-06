@@ -20,6 +20,21 @@ interface IClient {
   job_title: string;
   residence_province: string;
   residence_city: string;
+  education_level?:
+    | "under_diploma"
+    | "diploma"
+    | "associate"
+    | "bachelor"
+    | "master"
+    | "phd";
+  national_code?: string;
+  address?: string;
+  monthly_income?:
+    | "under_5m"
+    | "5m_to_10m"
+    | "10m_to_20m"
+    | "20m_to_50m"
+    | "over_50m";
   consultant: null;
   stats: {
     created_properties_count: number;

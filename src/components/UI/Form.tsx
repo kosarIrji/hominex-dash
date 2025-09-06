@@ -1,6 +1,7 @@
 /* eslint-disable */
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { iranProvinces } from "@/config/Provinces";
 import MapComponent from "./map";
 import ImageUploader from "./ImageUploader";
 import { url_v1 } from "@/config/urls";
@@ -179,6 +180,7 @@ interface ApiPayload {
   address?: string;
   latitude?: number;
   longitude?: number;
+  sector: string;
   status?: "draft" | "pending";
   images?: string[];
   is_featured: boolean;
@@ -187,7 +189,6 @@ interface ApiPayload {
 export default function SubmitPropertyPage() {
   const { data: session, status } = useSession();
   const token = session?.user?.access_token;
-
   // Utility to format numbers with commas
   function formatNumberWithCommas(value: string): string {
     const num = value.replace(/[^\d]/g, "");
@@ -262,6 +263,36 @@ export default function SubmitPropertyPage() {
     images: [],
   });
 
+  const [showDetails, setShowDetails] = useState(false); // State for toggling details section
+
+  // Province and city dropdown state
+  const [cityOptions, setCityOptions] = useState<string[]>([]);
+
+  // Handle province change to update city options
+  const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedProvince = e.target.value;
+    setFormData((prev) => ({ ...prev, province: selectedProvince, city: "" }));
+    const found = iranProvinces.find((p) => p.استان === selectedProvince);
+    setCityOptions(found ? found.شهرها : []);
+    setErrors((prev) => ({ ...prev, province: undefined, city: undefined }));
+  };
+
+  // Handle city change
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData((prev) => ({ ...prev, city: e.target.value }));
+    setErrors((prev) => ({ ...prev, city: undefined }));
+  };
+
+  // Initialize city options if province is pre-filled (edit mode)
+  useEffect(() => {
+    if (formData.province) {
+      const found = iranProvinces.find((p) => p.استان === formData.province);
+      setCityOptions(found ? found.شهرها : []);
+    } else {
+      setCityOptions([]);
+    }
+  }, [formData.province]);
+
   const [mapSelection, setMapSelection] = useState<string[]>([]);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -274,7 +305,7 @@ export default function SubmitPropertyPage() {
     if (!formData.title.trim()) newErrors.title = "عنوان آگهی الزامی است";
     if (!formData.province.trim()) newErrors.province = "استان الزامی است";
     if (!formData.city.trim()) newErrors.city = "شهر الزامی است";
-    if (!formData.address.trim()) newErrors.address = "آدرس الزامی است";
+    // if (!formData.address.trim()) newErrors.address = "آدرس الزامی است";
     if (!formData.property_type_id)
       newErrors.property_type_id = "شناسه نوع ملک الزامی است";
     setErrors(newErrors);
@@ -517,8 +548,7 @@ export default function SubmitPropertyPage() {
       province: formData.province || undefined,
       city: formData.city || undefined,
       address: formData.address || undefined,
-      latitude: mapSelection[0] ? parseFloat(mapSelection[0]) : undefined,
-      longitude: mapSelection[1] ? parseFloat(mapSelection[1]) : undefined,
+      sector: mapSelection[0],
       status: formData.status,
       images: formData.images,
       is_featured: false,
@@ -576,30 +606,6 @@ export default function SubmitPropertyPage() {
         errorToast("هیچ تصویری با موفقیت بارگذاری نشد.");
         return;
       }
-
-      // Step 3: Update property with image URLs //! UPDATE'S NOT NESSECARY
-      // const updateResponse = await fetch(
-      //   url_v1(`/user/properties/${propertyId}`),
-      //   {
-      //     method: "PATCH",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Authorization: `Bearer ${token}`,
-      //     },
-      //     body: JSON.stringify({ images: imageUrls }),
-      //   }
-      // );
-
-      // const updateResult = await updateResponse.json();
-      // if (!updateResponse.ok) {
-      //   if (updateResponse.status === 401) {
-      //     errorToast("احراز هویت ناموفق - لطفاً دوباره وارد شوید.");
-      //     signOut();
-      //     return;
-      //   }
-      //   errorToast(updateResult.message || "خطا در به‌روزرسانی تصاویر ملک");
-      //   return;
-      // }
 
       successToast("آگهی با موفقیت ثبت شد.");
       setFormData({
@@ -817,15 +823,19 @@ export default function SubmitPropertyPage() {
               className="block text-sm font-medium mb-1">
               استان
             </label>
-            <input
+            <select
               id="province"
               name="province"
-              type="text"
               value={formData.province}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
-              placeholder="مثال: تهران"
-            />
+              onChange={handleProvinceChange}
+              className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
+              <option value="">انتخاب استان</option>
+              {iranProvinces.map((prov) => (
+                <option key={prov.استان} value={prov.استان}>
+                  {prov.استان}
+                </option>
+              ))}
+            </select>
             {errors.province && (
               <p className="text-red-500 text-sm mt-1">{errors.province}</p>
             )}
@@ -834,15 +844,24 @@ export default function SubmitPropertyPage() {
             <label htmlFor="city" className="block text-sm font-medium mb-1">
               شهر
             </label>
-            <input
+            <select
               id="city"
               name="city"
-              type="text"
               value={formData.city}
-              onChange={handleInputChange}
+              onChange={handleCityChange}
               className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
-              placeholder="مثال: تهران"
-            />
+              disabled={!formData.province}>
+              <option value="">
+                {formData.province
+                  ? "انتخاب شهر"
+                  : "ابتدا استان را انتخاب کنید"}
+              </option>
+              {cityOptions.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
             {errors.city && (
               <p className="text-red-500 text-sm mt-1">{errors.city}</p>
             )}
@@ -1130,170 +1149,233 @@ export default function SubmitPropertyPage() {
               </div>
             </div>
 
-            <div>
-              <label
-                htmlFor="view_type"
-                className="block text-sm font-medium mb-1">
-                نوع ویو
-              </label>
-              <select
-                id="view_type"
-                name="view_type"
-                value={formData.view_type || ""}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
-                <option value="">انتخاب کنید</option>
-                <option value="street">خیابان</option>
-                <option value="alley">کوچه</option>
-                <option value="garden_view">حیاط</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="flooring_type"
-                className="block text-sm font-medium mb-1">
-                نوع کفپوش
-              </label>
-              <select
-                id="flooring_type"
-                name="flooring_type"
-                value={formData.flooring_type || ""}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
-                <option value="">انتخاب کنید</option>
-                <option value="ceramic">سرامیک</option>
-                <option value="parquet">پارکت</option>
-                <option value="stone">سنگ</option>
-                <option value="mosaic">موزاییک</option>
-                <option value="cement">سیمان</option>
-              </select>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="kitchen_type"
-                  className="block text-sm font-medium mb-1">
-                  نوع آشپزخانه
-                </label>
-                <select
-                  id="kitchen_type"
-                  name="kitchen_type"
-                  value={formData.kitchen_type || ""}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
-                  <option value="">انتخاب کنید</option>
-                  <option value="open">اپن</option>
-                  <option value="island">جزیره</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="cabinet_type"
-                  className="block text-sm font-medium mb-1">
-                  نوع کابینت
-                </label>
-                <select
-                  id="cabinet_type"
-                  name="cabinet_type"
-                  value={formData.cabinet_type || ""}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
-                  <option value="">انتخاب کنید</option>
-                  <option value="mdf">ام دی اف</option>
-                  <option value="wood">چوب</option>
-                  <option value="metal">فلزی</option>
-                  <option value="high_gloss">هایگلاس</option>
-                  <option value="vacuum">وکیوم</option>
-                  <option value="membrane">ممبران</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="closet_type"
-                className="block text-sm font-medium mb-1">
-                نوع کمد
-              </label>
-              <select
-                id="closet_type"
-                name="closet_type"
-                value={formData.closet_type || ""}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
-                <option value="">انتخاب کنید</option>
-                <option value="mdf">ام دی اف</option>
-                <option value="wood">چوب</option>
-                <option value="metal">فلزی</option>
-                <option value="high_gloss">هایگلاس</option>
-                <option value="vacuum">وکیوم</option>
-                <option value="membrane">ممبران</option>
-                <option value="none">ندارد</option>
-              </select>
-            </div>
-
             <div className="space-y-2">
-              <label className="block text-sm font-medium">سرویس بهداشتی</label>
-              <div className="flex flex-wrap gap-4">
-                {[
-                  { value: "iranian", label: "ایرانی" },
-                  { value: "western", label: "فرنگی" },
-                  { value: "both", label: "هر دو" },
-                ].map(({ value, label }) => (
+              <label className="block text-sm font-medium">
+                امکانات ساختمان
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {buildingAmenitiesOptions.map(({ value, label }) => (
                   <label key={value} className="flex items-center">
                     <input
-                      type="radio"
-                      name="wc_type"
+                      type="checkbox"
                       value={value}
-                      checked={formData.wc_type === value}
-                      onChange={handleInputChange}
+                      checked={formData.building_amenities.includes(value)}
+                      onChange={(e) =>
+                        handleCheckboxChange(e, "building_amenities")
+                      }
                       className="ml-2"
                     />
                     {label}
                   </label>
                 ))}
               </div>
-              <div>
-                <label
-                  htmlFor="wc_count"
-                  className="block text-sm font-medium mb-1">
-                  تعداد سرویس بهداشتی
-                </label>
-                <input
-                  id="wc_count"
-                  name="wc_count"
-                  type="text"
-                  value={formData.wc_count || ""}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
-                  placeholder="مثال: 2"
-                />
-              </div>
-              <div className="flex gap-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="has_bathtub"
-                    checked={formData.has_bathtub || false}
-                    onChange={handleBooleanChange}
-                    className="ml-2"
-                  />
-                  وان
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="has_jacuzzi"
-                    checked={formData.has_jacuzzi || false}
-                    onChange={handleBooleanChange}
-                    className="ml-2"
-                  />
-                  جکوزی
-                </label>
-              </div>
             </div>
+
+            {formData.property_category === "residential" && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowDetails(!showDetails)}
+                  className="w-full p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition mb-4">
+                  {showDetails ? "مخفی کردن جزئیات" : "نمایش جزئیات بیشتر"}
+                </button>
+                <div
+                  className={`space-y-4 transition-all duration-300 ease-in-out ${
+                    showDetails
+                      ? "max-h-screen opacity-100"
+                      : "max-h-0 opacity-0 overflow-hidden"
+                  }`}>
+                  <div>
+                    <label
+                      htmlFor="view_type"
+                      className="block text-sm font-medium mb-1">
+                      نوع ویو
+                    </label>
+                    <select
+                      id="view_type"
+                      name="view_type"
+                      value={formData.view_type || ""}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
+                      <option value="">انتخاب کنید</option>
+                      <option value="street">خیابان</option>
+                      <option value="alley">کوچه</option>
+                      <option value="garden_view">حیاط</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="flooring_type"
+                      className="block text-sm font-medium mb-1">
+                      نوع کفپوش
+                    </label>
+                    <select
+                      id="flooring_type"
+                      name="flooring_type"
+                      value={formData.flooring_type || ""}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
+                      <option value="">انتخاب کنید</option>
+                      <option value="ceramic">سرامیک</option>
+                      <option value="parquet">پارکت</option>
+                      <option value="stone">سنگ</option>
+                      <option value="mosaic">موزاییک</option>
+                      <option value="cement">سیمان</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        htmlFor="kitchen_type"
+                        className="block text-sm font-medium mb-1">
+                        نوع آشپزخانه
+                      </label>
+                      <select
+                        id="kitchen_type"
+                        name="kitchen_type"
+                        value={formData.kitchen_type || ""}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
+                        <option value="">انتخاب کنید</option>
+                        <option value="open">اپن</option>
+                        <option value="island">جزیره</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="cabinet_type"
+                        className="block text-sm font-medium mb-1">
+                        نوع کابینت
+                      </label>
+                      <select
+                        id="cabinet_type"
+                        name="cabinet_type"
+                        value={formData.cabinet_type || ""}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
+                        <option value="">انتخاب کنید</option>
+                        <option value="mdf">ام دی اف</option>
+                        <option value="wood">چوب</option>
+                        <option value="metal">فلزی</option>
+                        <option value="high_gloss">هایگلاس</option>
+                        <option value="vacuum">وکیوم</option>
+                        <option value="membrane">ممبران</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="closet_type"
+                      className="block text-sm font-medium mb-1">
+                      نوع کمد
+                    </label>
+                    <select
+                      id="closet_type"
+                      name="closet_type"
+                      value={formData.closet_type || ""}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
+                      <option value="">انتخاب کنید</option>
+                      <option value="mdf">ام دی اف</option>
+                      <option value="wood">چوب</option>
+                      <option value="metal">فلزی</option>
+                      <option value="high_gloss">هایگلاس</option>
+                      <option value="vacuum">وکیوم</option>
+                      <option value="membrane">ممبران</option>
+                      <option value="none">ندارد</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">
+                      سرویس بهداشتی
+                    </label>
+                    <div className="flex flex-wrap gap-4">
+                      {[
+                        { value: "iranian", label: "ایرانی" },
+                        { value: "western", label: "فرنگی" },
+                        { value: "both", label: "هر دو" },
+                      ].map(({ value, label }) => (
+                        <label key={value} className="flex items-center">
+                          <input
+                            type="radio"
+                            name="wc_type"
+                            value={value}
+                            checked={formData.wc_type === value}
+                            onChange={handleInputChange}
+                            className="ml-2"
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="wc_count"
+                        className="block text-sm font-medium mb-1">
+                        تعداد سرویس بهداشتی
+                      </label>
+                      <input
+                        id="wc_count"
+                        name="wc_count"
+                        type="text"
+                        value={formData.wc_count || ""}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
+                        placeholder="مثال: 2"
+                      />
+                    </div>
+                    <div className="flex gap-4">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          name="has_bathtub"
+                          checked={formData.has_bathtub || false}
+                          onChange={handleBooleanChange}
+                          className="ml-2"
+                        />
+                        وان
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          name="has_jacuzzi"
+                          checked={formData.has_jacuzzi || false}
+                          onChange={handleBooleanChange}
+                          className="ml-2"
+                        />
+                        جکوزی
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">
+                      امکانات ملک
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {amenitiesOptions.map(({ value, label }) => (
+                        <label key={value} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            value={value}
+                            checked={formData.amenities.includes(value)}
+                            onChange={(e) =>
+                              handleCheckboxChange(e, "amenities")
+                            }
+                            className="ml-2"
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -1424,26 +1506,6 @@ export default function SubmitPropertyPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium">امکانات ساختمان</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {buildingAmenitiesOptions.map(({ value, label }) => (
-                <label key={value} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value={value}
-                    checked={formData.building_amenities.includes(value)}
-                    onChange={(e) =>
-                      handleCheckboxChange(e, "building_amenities")
-                    }
-                    className="ml-2"
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
             <label className="block text-sm font-medium">تأسیسات</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {utilitiesOptions.map(({ value, label }) => (
@@ -1451,8 +1513,9 @@ export default function SubmitPropertyPage() {
                   <input
                     type="checkbox"
                     value={value}
-                    // @ts-ignore
-                    checked={formData.utilities.includes(value)}
+                    checked={formData.utilities.includes(
+                      value as "water" | "electricity" | "gas" | "phone"
+                    )}
                     onChange={(e) => handleCheckboxChange(e, "utilities")}
                     className="ml-2"
                   />
@@ -1462,23 +1525,6 @@ export default function SubmitPropertyPage() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">امکانات ملک</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {amenitiesOptions.map(({ value, label }) => (
-                <label key={value} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value={value}
-                    checked={formData.amenities.includes(value)}
-                    onChange={(e) => handleCheckboxChange(e, "amenities")}
-                    className="ml-2"
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-          </div>
           <div>
             <label
               htmlFor="description"
@@ -1497,14 +1543,26 @@ export default function SubmitPropertyPage() {
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className={`w-full cursor-pointer p-3 rounded-md text-white ${
-            isSubmitting ? "bg-blue-300" : "bg-blue-500 hover:bg-blue-600"
-          }`}>
-          {isSubmitting ? "در حال ثبت..." : "ثبت آگهی"}
-        </button>
+        <div className="flex sm:flex-row flex-col gap-2">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            onClick={() => setFormData({ ...formData, status: "pending" })}
+            className={`sm:w-3/4 w-full cursor-pointer p-3 rounded-md text-white ${
+              isSubmitting ? "bg-blue-300" : "bg-blue-500 hover:bg-blue-600"
+            }`}>
+            {isSubmitting ? "در حال ثبت..." : "ثبت آگهی"}
+          </button>
+          <button
+            type="submit"
+            onClick={() => setFormData({ ...formData, status: "draft" })}
+            disabled={isSubmitting}
+            className={`sm:w-1/4 w-full cursor-pointer p-3 rounded-md text-white ${
+              isSubmitting ? "bg-gray-300" : "bg-gray-500 hover:bg-gray-600"
+            }`}>
+            {isSubmitting ? "در حال ثبت..." : "پیش نویس"}
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -7,60 +7,75 @@ import { Yellow, Green, Red } from "../UI/Badges";
 import { iranProvinces } from "../../config/Provinces";
 import { url_v1 } from "@/config/urls";
 import { useSession } from "next-auth/react";
-import { errorToast, successToast } from "@/config/Toasts";
+import { successToast } from "@/config/Toasts";
 import UpgradeToRealEstate from "../UI/UpgradeToRealEstate";
-export interface Client {
+
+// src/types/client.ts (or wherever IClient is defined)
+export interface IClient {
   user_type: "regular" | "admin" | "editor";
   is_active: boolean;
-  profile_picture: string;
+  profile_image_url: string;
   full_name: string;
   email?: string;
   phone?: string;
   age?: number;
-  marital_status?: string;
+  marital_status?: "single" | "married" | "divorced" | "widowed";
   job_title?: string;
   residence_province?: string;
   residence_city?: string;
-  education?: string;
-  national_id?: string;
+  education_level?:
+    | "under_diploma"
+    | "diploma"
+    | "associate"
+    | "bachelor"
+    | "master"
+    | "phd";
+  national_code?: string;
   address?: string;
-  monthly_income_min?: number;
-  monthly_income_max?: number;
-  office_name?: string;
-  work_experience?: string;
-  office_bio?: string;
-  workplace_address?: string;
-  consultants_count?: string;
-  instagram_id?: string;
-  email_address?: string;
+  monthly_income?:
+    | "under_5m"
+    | "5m_to_10m"
+    | "10m_to_20m"
+    | "20m_to_50m"
+    | "over_50m";
 }
 
 export default function Account() {
-  const client = useSelector(
-    (state: RootState) => state.authSlice.client as Client
-  );
+  const client = useSelector((state: RootState) => state.authSlice.client); // No need for type casting
   const { data: session } = useSession();
   const token = session?.user?.access_token;
 
   const [formData, setFormData] = useState({
-    full_name: client.full_name || "",
-    email: client.email || "",
-    phone: client.phone || "",
-    age: client.age?.toString() || "",
-    maritalStatus: client.marital_status || "",
-    jobTitle: client.job_title || "",
-    selectedProvince: client.residence_province || "",
-    selectedCity: client.residence_city || "",
-    education: client.education || "",
-    national_id: client.national_id || "",
-    address: client.address || "",
-    monthly_income_min: client.monthly_income_min?.toString() || "",
-    monthly_income_max: client.monthly_income_max?.toString() || "",
+    full_name: client?.full_name || "",
+    email: client?.email || "",
+    phone: client?.phone || "",
+    age: client?.age?.toString() || "",
+    marital_status: client?.marital_status || "",
+    job_title: client?.job_title || "",
+    selectedProvince: client?.residence_province || "",
+    selectedCity: client?.residence_city || "",
+    education_level: client?.education_level || "",
+    national_code: client?.national_code || "",
+    address: client?.address || "",
+    monthly_income: client?.monthly_income || "",
     new_password: "",
+    current_password: "",
+    new_password_confirmation: "",
+    profile_image: null as File | null,
   });
   const [cities, setCities] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string | null }>({
+    profile: null,
+    complete: null,
+    image: null,
+    password: null,
+  });
+  const [isSubmitting, setIsSubmitting] = useState({
+    profile: false,
+    complete: false,
+    image: false,
+    password: false,
+  });
 
   // Initialize cities based on province
   useEffect(() => {
@@ -72,11 +87,16 @@ export default function Account() {
     }
   }, [formData.selectedProvince]);
 
-  // Function to format number with commas
-  const formatNumberWithCommas = (value: string): string => {
-    const cleanedValue = value.replace(/[^0-9]/g, "");
-    if (!cleanedValue) return "";
-    return parseInt(cleanedValue).toLocaleString("en-EN");
+  // Iranian national code validation
+  const validateNationalCode = (code: string): boolean => {
+    if (!/^\d{10}$/.test(code)) return false;
+    const check = parseInt(code[9]);
+    const sum = code
+      .slice(0, 9)
+      .split("")
+      .reduce((acc, digit, i) => acc + parseInt(digit) * (10 - i), 0);
+    const remainder = sum % 11;
+    return remainder < 2 ? check === remainder : check === 11 - remainder;
   };
 
   // Handle form input changes
@@ -84,15 +104,9 @@ export default function Account() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    if (
-      name === "monthly_income_min" ||
-      name === "monthly_income_max" ||
-      name === "age"
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: formatNumberWithCommas(value),
-      }));
+    if (name === "age") {
+      const cleanedValue = value.replace(/[^0-9]/g, "");
+      setFormData((prev) => ({ ...prev, [name]: cleanedValue }));
     } else if (name === "selectedProvince") {
       const found = iranProvinces.find((item) => item.استان === value);
       setCities(found ? found.شهرها : []);
@@ -104,33 +118,135 @@ export default function Account() {
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
+    setErrors((prev) => ({
+      ...prev,
+      profile: null,
+      complete: null,
+      password: null,
+    }));
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Handle file input change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setErrors((prev) => ({ ...prev, image: null }));
+    if (file && file.size > 2 * 1024 * 1024) {
+      setErrors((prev) => ({
+        ...prev,
+        image: "حجم تصویر باید کمتر از ۲ مگابایت باشد",
+      }));
+      return;
+    }
+    if (file && !["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
+      setErrors((prev) => ({
+        ...prev,
+        image: "فرمت تصویر باید jpeg، jpg یا png باشد",
+      }));
+      return;
+    }
+    setFormData((prev) => ({ ...prev, profile_image: file }));
+  };
+
+  // Handle profile update
+  const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    setErrors((prev) => ({ ...prev, profile: null }));
+    setIsSubmitting((prev) => ({ ...prev, profile: true }));
+
+    try {
+      const response = await fetch(url_v1("/user/profile"), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          full_name: formData.full_name,
+          email: formData.email,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        if (response.status === 422) {
+          throw new Error("اطلاعات وارد شده نامعتبر است");
+        }
+        if (response.status === 401) {
+          throw new Error("لطفاً دوباره وارد شوید");
+        }
+        throw new Error(result.message || "خطا در به‌روزرسانی اطلاعات");
+      }
+
+      successToast(result.message || "پروفایل با موفقیت به‌روزرسانی شد");
+      // Update Redux store here instead of reloading
+    } catch (err: any) {
+      setErrors((prev) => ({
+        ...prev,
+        profile: err.message || "خطا در ارسال اطلاعات",
+      }));
+    } finally {
+      setIsSubmitting((prev) => ({ ...prev, profile: false }));
+    }
+  };
+
+  // Handle profile completion
+  const handleProfileComplete = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors((prev) => ({ ...prev, complete: null }));
+    setIsSubmitting((prev) => ({ ...prev, complete: true }));
 
     // Validation
-    if (formData.new_password && formData.new_password.length < 8) {
-      setError("رمز عبور باید حداقل ۸ کاراکتر باشد");
-      setIsSubmitting(false);
+    if (
+      formData.age &&
+      (isNaN(parseInt(formData.age)) ||
+        parseInt(formData.age) < 18 ||
+        parseInt(formData.age) > 100)
+    ) {
+      setErrors((prev) => ({
+        ...prev,
+        complete: "سن باید بین ۱۸ تا ۱۰۰ باشد",
+      }));
+      setIsSubmitting((prev) => ({ ...prev, complete: false }));
+      return;
+    }
+    if (formData.job_title && formData.job_title.length > 100) {
+      setErrors((prev) => ({
+        ...prev,
+        complete: "عنوان شغلی حداکثر ۱۰۰ کاراکتر باشد",
+      }));
+      setIsSubmitting((prev) => ({ ...prev, complete: false }));
+      return;
+    }
+    if (formData.selectedProvince && formData.selectedProvince.length > 100) {
+      setErrors((prev) => ({
+        ...prev,
+        complete: "استان حداکثر ۱۰۰ کاراکتر باشد",
+      }));
+      setIsSubmitting((prev) => ({ ...prev, complete: false }));
+      return;
+    }
+    if (formData.selectedCity && formData.selectedCity.length > 100) {
+      setErrors((prev) => ({
+        ...prev,
+        complete: "شهر حداکثر ۱۰۰ کاراکتر باشد",
+      }));
+      setIsSubmitting((prev) => ({ ...prev, complete: false }));
       return;
     }
     if (
-      formData.monthly_income_min &&
-      formData.monthly_income_max &&
-      parseInt(formData.monthly_income_min.replace(/,/g, "")) >
-        parseInt(formData.monthly_income_max.replace(/,/g, ""))
+      formData.national_code &&
+      !validateNationalCode(formData.national_code)
     ) {
-      setError("حداقل درآمد نمی‌تواند بیشتر از حداکثر درآمد باشد");
-      setIsSubmitting(false);
+      setErrors((prev) => ({ ...prev, complete: "کدملی نامعتبر است" }));
+      setIsSubmitting((prev) => ({ ...prev, complete: false }));
       return;
     }
-    if (formData.age && parseInt(formData.age.replace(/,/g, "")) < 0) {
-      setError("سن نمی‌تواند منفی باشد");
-      setIsSubmitting(false);
+    if (formData.address && formData.address.length > 500) {
+      setErrors((prev) => ({
+        ...prev,
+        complete: "آدرس حداکثر ۵۰۰ کاراکتر باشد",
+      }));
+      setIsSubmitting((prev) => ({ ...prev, complete: false }));
       return;
     }
 
@@ -142,35 +258,148 @@ export default function Account() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          age: formData.age ? parseInt(formData.age.replace(/,/g, "")) : null,
-          marital_status: formData.maritalStatus || null,
-          job_title: formData.jobTitle || null,
+          age: formData.age ? parseInt(formData.age) : null,
+          marital_status: formData.marital_status || null,
+          job_title: formData.job_title || null,
           residence_province: formData.selectedProvince || null,
           residence_city: formData.selectedCity || null,
-          education: formData.education || null,
-          national_id: formData.national_id || null,
+          education_level: formData.education_level || null,
+          national_code: formData.national_code || null,
           address: formData.address || null,
-          monthly_income_min: formData.monthly_income_min
-            ? parseInt(formData.monthly_income_min.replace(/,/g, ""))
-            : null,
-          monthly_income_max: formData.monthly_income_max
-            ? parseInt(formData.monthly_income_max.replace(/,/g, ""))
-            : null,
-          new_password: formData.new_password || null,
+          monthly_income: formData.monthly_income || null,
         }),
       });
 
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.message || "خطا در به‌روزرسانی اطلاعات");
+        if (response.status === 422) {
+          throw new Error("اطلاعات وارد شده نامعتبر است");
+        }
+        if (response.status === 401) {
+          throw new Error("لطفاً دوباره وارد شوید");
+        }
+        throw new Error(result.message || "خطا در تکمیل پروفایل");
       }
 
-      successToast(result.message || "اطلاعات با موفقیت به‌روزرسانی شد");
-      window.location.reload(); // Reload to reflect updated client data
-    } catch (err) {
-      if (err) errorToast("خطا در ارسال اطلاعات");
+      successToast(result.message || "پروفایل با موفقیت تکمیل شد");
+      // Update Redux store here instead of reloading
+    } catch (err: any) {
+      setErrors((prev) => ({
+        ...prev,
+        complete: err.message || "خطا در ارسال اطلاعات",
+      }));
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting((prev) => ({ ...prev, complete: false }));
+    }
+  };
+
+  // Handle profile image upload
+  const handleProfileImageUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors((prev) => ({ ...prev, image: null }));
+    if (!formData.profile_image) {
+      setErrors((prev) => ({ ...prev, image: "لطفاً یک تصویر انتخاب کنید" }));
+      return;
+    }
+
+    setIsSubmitting((prev) => ({ ...prev, image: true }));
+    const formDataToSend = new FormData();
+    formDataToSend.append("profile_image", formData.profile_image);
+
+    try {
+      const response = await fetch(url_v1("/user/profile/upload-image"), {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formDataToSend,
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        if (response.status === 422) {
+          throw new Error("تصویر نامعتبر است");
+        }
+        if (response.status === 401) {
+          throw new Error("لطفاً دوباره وارد شوید");
+        }
+        throw new Error(result.message || "خطا در آپلود تصویر");
+      }
+
+      successToast(result.message || "تصویر پروفایل با موفقیت آپلود شد");
+      // Update Redux store here instead of reloading
+    } catch (err: any) {
+      setErrors((prev) => ({
+        ...prev,
+        image: err.message || "خطا در ارسال تصویر",
+      }));
+    } finally {
+      setIsSubmitting((prev) => ({ ...prev, image: false }));
+    }
+  };
+
+  // Handle password change
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors((prev) => ({ ...prev, password: null }));
+    setIsSubmitting((prev) => ({ ...prev, password: true }));
+
+    if (formData.new_password.length < 8) {
+      setErrors((prev) => ({
+        ...prev,
+        password: "رمز عبور جدید باید حداقل ۸ کاراکتر باشد",
+      }));
+      setIsSubmitting((prev) => ({ ...prev, password: false }));
+      return;
+    }
+    if (formData.new_password !== formData.new_password_confirmation) {
+      setErrors((prev) => ({
+        ...prev,
+        password: "رمز عبور جدید و تأیید آن مطابقت ندارند",
+      }));
+      setIsSubmitting((prev) => ({ ...prev, password: false }));
+      return;
+    }
+
+    try {
+      const response = await fetch(url_v1("/user/profile/change-password"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          current_password: formData.current_password,
+          new_password: formData.new_password,
+          new_password_confirmation: formData.new_password_confirmation,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        if (response.status === 422) {
+          throw new Error("اطلاعات رمز عبور نامعتبر است");
+        }
+        if (response.status === 401) {
+          throw new Error("رمز عبور فعلی نادرست است");
+        }
+        throw new Error(result.message || "خطا در تغییر رمز عبور");
+      }
+
+      successToast(result.message || "رمز عبور با موفقیت تغییر یافت");
+      setFormData((prev) => ({
+        ...prev,
+        current_password: "",
+        new_password: "",
+        new_password_confirmation: "",
+      }));
+    } catch (err: any) {
+      setErrors((prev) => ({
+        ...prev,
+        password: err.message || "خطا در ارسال اطلاعات",
+      }));
+    } finally {
+      setIsSubmitting((prev) => ({ ...prev, password: false }));
     }
   };
 
@@ -180,14 +409,14 @@ export default function Account() {
         <div className="pt-5 pr-5">
           <Yellow
             value={`دسترسی ${
-              client.user_type === "regular"
+              client?.user_type === "regular"
                 ? "کاربر"
-                : client.user_type === "admin"
+                : client?.user_type === "admin"
                 ? "ادمین"
                 : "ویراستار"
             }`}
           />
-          {client.is_active ? (
+          {client?.is_active ? (
             <Green value="وضعیت فعال" />
           ) : (
             <Red value="وضعیت غیرفعال" />
@@ -203,8 +432,9 @@ export default function Account() {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="font-bold text-xl text-gray-600 mb-4">اطلاعات کاربری</h2>
         <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          onSubmit={handleProfileUpdate}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          aria-describedby="profile-error">
           <div>
             <label
               htmlFor="full_name"
@@ -216,8 +446,9 @@ export default function Account() {
               name="full_name"
               type="text"
               value={formData.full_name}
-              disabled
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
           </div>
           <div>
@@ -231,8 +462,8 @@ export default function Account() {
               name="email"
               type="email"
               value={formData.email}
-              disabled
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -248,8 +479,38 @@ export default function Account() {
               value={formData.phone}
               disabled
               className="mt-1 block w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300"
+              aria-describedby="phone-info"
             />
+            <p id="phone-info" className="text-sm text-gray-500 mt-1">
+              شماره موبایل قابل تغییر نیست.
+            </p>
           </div>
+          {errors.profile && (
+            <div
+              id="profile-error"
+              className="md:col-span-2 text-sm text-red-500"
+              role="alert">
+              {errors.profile}
+            </div>
+          )}
+          <div className="md:col-span-2 text-right">
+            <button
+              type="submit"
+              disabled={isSubmitting.profile}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+              {isSubmitting.profile
+                ? "در حال به‌روزرسانی..."
+                : "به‌روزرسانی اطلاعات پایه"}
+            </button>
+          </div>
+        </form>
+      </div>
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="font-bold text-xl text-gray-600 mb-4">تکمیل پروفایل</h2>
+        <form
+          onSubmit={handleProfileComplete}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          aria-describedby="complete-error">
           <div>
             <label
               htmlFor="age"
@@ -268,35 +529,38 @@ export default function Account() {
           </div>
           <div>
             <label
-              htmlFor="maritalStatus"
+              htmlFor="marital_status"
               className="block text-sm font-medium text-gray-700">
               وضعیت تاهل
             </label>
             <select
-              id="maritalStatus"
-              name="maritalStatus"
-              value={formData.maritalStatus}
+              id="marital_status"
+              name="marital_status"
+              value={formData.marital_status}
               onChange={handleInputChange}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600">
               <option value="">انتخاب</option>
               <option value="single">مجرد</option>
               <option value="married">متاهل</option>
+              <option value="divorced">مطلقه</option>
+              <option value="widowed">بیوه</option>
             </select>
           </div>
           <div>
             <label
-              htmlFor="jobTitle"
+              htmlFor="job_title"
               className="block text-sm font-medium text-gray-700">
               عنوان شغلی
             </label>
             <input
-              id="jobTitle"
-              name="jobTitle"
+              id="job_title"
+              name="job_title"
               type="text"
-              value={formData.jobTitle}
+              value={formData.job_title}
               onChange={handleInputChange}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600"
               placeholder="مثال: مهندس نرم‌افزار"
+              maxLength={100}
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -346,35 +610,36 @@ export default function Account() {
           </div>
           <div>
             <label
-              htmlFor="education"
+              htmlFor="education_level"
               className="block text-sm font-medium text-gray-700">
               تحصیلات
             </label>
             <select
-              id="education"
-              name="education"
-              value={formData.education}
+              id="education_level"
+              name="education_level"
+              value={formData.education_level}
               onChange={handleInputChange}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600">
               <option value="">انتخاب کنید</option>
-              <option value="دیپلم">دیپلم</option>
-              <option value="کاردانی">کاردانی</option>
-              <option value="کارشناسی">کارشناسی</option>
-              <option value="کارشناسی ارشد">کارشناسی ارشد</option>
-              <option value="دکتری">دکتری</option>
+              <option value="under_diploma">زیر دیپلم</option>
+              <option value="diploma">دیپلم</option>
+              <option value="associate">فوق دیپلم</option>
+              <option value="bachelor">لیسانس</option>
+              <option value="master">فوق لیسانس</option>
+              <option value="phd">دکتری</option>
             </select>
           </div>
           <div>
             <label
-              htmlFor="national_id"
+              htmlFor="national_code"
               className="block text-sm font-medium text-gray-700">
               کدملی
             </label>
             <input
-              id="national_id"
-              name="national_id"
+              id="national_code"
+              name="national_code"
               type="text"
-              value={formData.national_id}
+              value={formData.national_code}
               onChange={handleInputChange}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600"
               placeholder="مثال: ۱۲۳۴۵۶۷۸۹۰"
@@ -396,41 +661,107 @@ export default function Account() {
               onChange={handleInputChange}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600"
               placeholder="مثال: تهران، خیابان آزادی، کوچه ۱۲"
+              maxLength={500}
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="monthly_income_min"
-                className="block text-sm font-medium text-gray-700">
-                حداقل درآمد ماهانه (تومان)
-              </label>
-              <input
-                id="monthly_income_min"
-                name="monthly_income_min"
-                type="text"
-                value={formData.monthly_income_min}
-                onChange={handleInputChange}
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600"
-                placeholder="مثال: 10,000,000"
-              />
+          <div>
+            <label
+              htmlFor="monthly_income"
+              className="block text-sm font-medium text-gray-700">
+              میزان درآمد ماهانه
+            </label>
+            <select
+              id="monthly_income"
+              name="monthly_income"
+              value={formData.monthly_income}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600">
+              <option value="">انتخاب کنید</option>
+              <option value="under_5m">زیر ۵ میلیون</option>
+              <option value="5m_to_10m">۵ تا ۱۰ میلیون</option>
+              <option value="10m_to_20m">۱۰ تا ۲۰ میلیون</option>
+              <option value="20m_to_50m">۲۰ تا ۵۰ میلیون</option>
+              <option value="over_50m">بالای ۵۰ میلیون</option>
+            </select>
+          </div>
+          {errors.complete && (
+            <div
+              id="complete-error"
+              className="md:col-span-2 text-sm text-red-500"
+              role="alert">
+              {errors.complete}
             </div>
-            <div>
-              <label
-                htmlFor="monthly_income_max"
-                className="block text-sm font-medium text-gray-700">
-                حداکثر درآمد ماهانه (تومان)
-              </label>
-              <input
-                id="monthly_income_max"
-                name="monthly_income_max"
-                type="text"
-                value={formData.monthly_income_max}
-                onChange={handleInputChange}
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600"
-                placeholder="مثال: 20,000,000"
-              />
+          )}
+          <div className="md:col-span-2 text-right">
+            <button
+              type="submit"
+              disabled={isSubmitting.complete}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+              {isSubmitting.complete ? "در حال تکمیل..." : "تکمیل پروفایل"}
+            </button>
+          </div>
+        </form>
+      </div>
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="font-bold text-xl text-gray-600 mb-4">
+          آپلود تصویر پروفایل
+        </h2>
+        <form
+          onSubmit={handleProfileImageUpload}
+          className="grid grid-cols-1 gap-4"
+          aria-describedby="image-error">
+          <div>
+            <label
+              htmlFor="profile_image"
+              className="block text-sm font-medium text-gray-700">
+              تصویر پروفایل (حداکثر ۲ مگابایت، فرمت jpeg/jpg/png)
+            </label>
+            <input
+              id="profile_image"
+              name="profile_image"
+              type="file"
+              accept="image/jpeg,image/jpg,image/png"
+              onChange={handleFileChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600"
+            />
+          </div>
+          {errors.image && (
+            <div id="image-error" className="text-sm text-red-500" role="alert">
+              {errors.image}
             </div>
+          )}
+          <div className="text-right">
+            <button
+              type="submit"
+              disabled={isSubmitting.image || !formData.profile_image}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+              {isSubmitting.image ? "در حال آپلود..." : "آپلود تصویر"}
+            </button>
+          </div>
+        </form>
+      </div>
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="font-bold text-xl text-gray-600 mb-4">تغییر رمز عبور</h2>
+        <form
+          onSubmit={handlePasswordChange}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          aria-describedby="password-error">
+          <div>
+            <label
+              htmlFor="current_password"
+              className="block text-sm font-medium text-gray-700">
+              رمز عبور فعلی
+            </label>
+            <input
+              id="current_password"
+              name="current_password"
+              type="password"
+              value={formData.current_password}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600"
+              placeholder="رمز عبور فعلی"
+              required
+            />
           </div>
           <div>
             <label
@@ -442,26 +773,44 @@ export default function Account() {
               id="new_password"
               name="new_password"
               type="password"
-              autoComplete="new-password"
               value={formData.new_password}
               onChange={handleInputChange}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600"
               placeholder="حداقل ۸ کاراکتر"
+              required
             />
           </div>
-          {error && (
-            <div className="md:col-span-2 text-sm text-red-500" role="alert">
-              {error}
+          <div>
+            <label
+              htmlFor="new_password_confirmation"
+              className="block text-sm font-medium text-gray-700">
+              تأیید رمز عبور جدید
+            </label>
+            <input
+              id="new_password_confirmation"
+              name="new_password_confirmation"
+              type="password"
+              value={formData.new_password_confirmation}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600"
+              placeholder="تکرار رمز عبور جدید"
+              required
+            />
+          </div>
+          {errors.password && (
+            <div
+              id="password-error"
+              className="md:col-span-2 text-sm text-red-500"
+              role="alert">
+              {errors.password}
             </div>
           )}
           <div className="md:col-span-2 text-right">
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting.password}
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-              {isSubmitting
-                ? "در حال به‌روزرسانی..."
-                : "تایید و به‌روزرسانی اطلاعات"}
+              {isSubmitting.password ? "در حال تغییر..." : "تغییر رمز عبور"}
             </button>
           </div>
         </form>

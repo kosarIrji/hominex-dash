@@ -10,8 +10,10 @@ import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import { switchRoute } from "@/redux/Slices/routeSwitch";
-
+import { useSession } from "next-auth/react";
 export default function Main() {
+  const session = useSession();
+  console.log(session.data?.user?.access_token);
   const dispatch = useDispatch<AppDispatch>();
   const { client } = useSelector((state: RootState) => state.authSlice);
 

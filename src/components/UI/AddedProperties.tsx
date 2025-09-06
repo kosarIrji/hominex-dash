@@ -295,6 +295,15 @@ export default function AddedProperties() {
             }`}>
             آرشیو شده
           </button>
+          <button
+            onClick={() => setFilter("draft")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              filter === "draft"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}>
+            پیش نویس
+          </button>
         </div>
       </div>
 

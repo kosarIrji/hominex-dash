@@ -16,6 +16,7 @@ import { MdOutlineSupportAgent } from "react-icons/md";
 import { TbLockAccess } from "react-icons/tb";
 import { LiaClipboardListSolid } from "react-icons/lia";
 import { useSession } from "next-auth/react";
+import { MdOutlineSwitchAccessShortcut } from "react-icons/md";
 
 export default function Sidebar() {
   const Sidebar = useSelector((state: RootState) => state.sidebarSlice.value);
@@ -67,6 +68,9 @@ export default function Sidebar() {
             {i === 4 && <TbLockAccess className="w-5 h-5 mx-2" />}
             {i === 5 && <MdOutlineSupportAgent className="w-5 h-5 mx-2" />}
             {i === 6 && <LiaClipboardListSolid className="w-5 h-5 mx-2" />}
+            {i === 7 && (
+              <MdOutlineSwitchAccessShortcut className="w-5 h-5 mx-2" />
+            )}
             {item.title}
           </li>
         ))}

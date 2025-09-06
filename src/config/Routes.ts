@@ -34,4 +34,9 @@ export const Routes = [
     path: "allProperties",
     access: "admin",
   },
+  {
+    title: "درخواست ارتقا",
+    path: "promotions",
+    access: "admin",
+  },
 ];

@@ -118,7 +118,7 @@ export function PropertyCard({
     }
   };
   function convertPropertyPath(path: string): string {
-    const baseUrl = "https://hominow.ir/estates";
+    const baseUrl = "https://hominex.ir/estates";
     // Remove leading "/properties"
     const newPath = path.replace(/^\/properties/, "");
     return `${baseUrl}${newPath}`;
