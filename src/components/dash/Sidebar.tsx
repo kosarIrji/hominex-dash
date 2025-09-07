@@ -17,6 +17,7 @@ import { TbLockAccess } from "react-icons/tb";
 import { LiaClipboardListSolid } from "react-icons/lia";
 import { useSession } from "next-auth/react";
 import { MdOutlineSwitchAccessShortcut } from "react-icons/md";
+import Link from "next/link";
 
 export default function Sidebar() {
   const Sidebar = useSelector((state: RootState) => state.sidebarSlice.value);
@@ -31,14 +32,15 @@ export default function Sidebar() {
         Sidebar ? "right-0" : "right-[-100%]"
       } top-0 h-screen w-[15rem] bg-[var(--background)]/70 backdrop-blur-md shadow-2xl transition-all z-20`}>
       <div className="flex flex-row items-center py-1 px-3">
-        <Image
-          alt="hominex logo"
-          width={50}
-          height={50}
-          src={"/assets/img/logo.png"}
-          className=""
-        />
-        <span className="font-bold">هومینکس</span>
+        <Link href={"https://hominex.ir"}>
+          <Image
+            alt="hominex logo"
+            width={50}
+            height={50}
+            src={"/assets/img/logo.png"}
+          />
+          <span className="font-bold">هومینکس</span>
+        </Link>
       </div>
       <ul className="flex flex-col overflow-y-auto gap-4 pt-10 pl-5 | [&>*]:flex [&>*]:items-center [&>*]:gap-2 [&>*]:px-2 [&>*]:py-2 [&>*]:cursor-pointer">
         {Routes.filter((item) => {

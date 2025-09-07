@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { url_v1 } from "@/config/urls";
 import { successToast, errorToast } from "@/config/Toasts";
 import { PiBuildingsLight } from "react-icons/pi";
 
@@ -26,16 +25,6 @@ interface ConsultantRequest {
   submitted_at: string;
 }
 
-interface ApiResponse {
-  success: boolean;
-  message: string;
-  data: {
-    requests: ConsultantRequest[];
-    total: number;
-  };
-  timestamp: string;
-}
-
 export default function Promotions() {
   const { data: session } = useSession();
   const token = session?.user?.access_token;
@@ -48,28 +37,24 @@ export default function Promotions() {
   const [rejectReason, setRejectReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch consultant requests
+  // ✅ Fetch consultant requests
   useEffect(() => {
     const fetchRequests = async () => {
       if (!token) return;
       setLoading(true);
       try {
-        const response = await fetch(url_v1("/admin/consultant-requests/"), {
+        const response = await fetch(`/api/promotions?token=${token}`, {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          mode: "cors", // default for cross-origin requests
-          cache: "no-cache",
+          headers: { "Content-Type": "application/json" },
         });
-        const result: ApiResponse = await response.json();
-        if (!response.ok) {
+        const result = await response.json();
+        if (!response.ok)
           throw new Error(result.message || "خطا در دریافت لیست درخواست‌ها");
-        }
         setRequests(result.data.requests);
-      } catch (err: any) {
-        errorToast(err.message || "خطا در دریافت لیست درخواست‌ها");
+      } catch (err) {
+        errorToast(
+          err instanceof Error ? err.message : "خطا در دریافت لیست درخواست‌ها"
+        );
       } finally {
         setLoading(false);
       }
@@ -77,37 +62,32 @@ export default function Promotions() {
     fetchRequests();
   }, [token]);
 
-  // Handle approve request
+  // ✅ Approve request
   const handleApprove = async (requestId: number) => {
     if (!token) return;
     setIsSubmitting(true);
     try {
-      const response = await fetch(
-        url_v1(`/admin/consultant-requests/${requestId}/approve`),
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`/api/promotions/${requestId}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
       const result = await response.json();
       if (!response.ok) {
-        if (response.status === 400) {
+        if (response.status === 400)
           throw new Error("این درخواست قبلاً تأیید شده است");
-        }
         throw new Error(result.message || "خطا در تأیید درخواست");
       }
       successToast(result.message || "درخواست با موفقیت تأیید شد");
-      setRequests(requests.filter((req) => req.id !== requestId));
-    } catch (err: any) {
-      errorToast(err.message || "خطا در تأیید درخواست");
+      setRequests((prev) => prev.filter((req) => req.id !== requestId));
+    } catch (err) {
+      errorToast(err instanceof Error ? err.message : "خطا در تأیید درخواست");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Handle reject request
+  // ✅ Reject request
   const handleReject = async () => {
     if (!token || !selectedRequestId) return;
     if (rejectReason.length < 10 || rejectReason.length > 255) {
@@ -117,21 +97,17 @@ export default function Promotions() {
     setIsSubmitting(true);
     try {
       const response = await fetch(
-        url_v1(`/admin/consultant-requests/${selectedRequestId}/reject`),
+        `/api/promotions/${selectedRequestId}/reject`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ reason: rejectReason }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, reason: rejectReason }),
         }
       );
       const result = await response.json();
       if (!response.ok) {
-        if (response.status === 400) {
+        if (response.status === 400)
           throw new Error("این درخواست قبلاً رد شده است");
-        }
         if (response.status === 422) {
           throw new Error(
             result.errors?.reason?.[0] || "دلیل رد درخواست نامعتبر است"
@@ -140,24 +116,22 @@ export default function Promotions() {
         throw new Error(result.message || "خطا در رد درخواست");
       }
       successToast(result.message || "درخواست با موفقیت رد شد");
-      setRequests(requests.filter((req) => req.id !== selectedRequestId));
+      setRequests((prev) => prev.filter((req) => req.id !== selectedRequestId));
       setRejectModalOpen(false);
       setRejectReason("");
       setSelectedRequestId(null);
-    } catch (err: any) {
-      errorToast(err.message || "خطا در رد درخواست");
+    } catch (err) {
+      errorToast(err instanceof Error ? err.message : "خطا در رد درخواست");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Open reject modal
   const openRejectModal = (requestId: number) => {
     setSelectedRequestId(requestId);
     setRejectModalOpen(true);
   };
 
-  // Close reject modal
   const closeRejectModal = () => {
     setRejectModalOpen(false);
     setRejectReason("");
@@ -211,7 +185,7 @@ export default function Promotions() {
                   <td className="py-3 px-4">
                     {new Date(request.submitted_at).toLocaleString("fa-IR")}
                   </td>
-                  <td className="py-3 px-4 flex space-x-2 space-x-reverse">
+                  <td className="py-3 px-4 flex gap-2 space-x-2 space-x-reverse">
                     <button
                       onClick={() => handleApprove(request.id)}
                       disabled={isSubmitting}
@@ -267,7 +241,7 @@ export default function Promotions() {
                   {new Date(request.submitted_at).toLocaleString("fa-IR")}
                 </span>
               </div>
-              <div className="flex justify-end space-x-2 space-x-reverse">
+              <div className="flex justify-end gap-2 space-x-2 space-x-reverse">
                 <button
                   onClick={() => handleApprove(request.id)}
                   disabled={isSubmitting}

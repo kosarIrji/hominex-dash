@@ -66,8 +66,8 @@ export default function UpgradeToRealEstate() {
           throw new Error(result.message || "خطا در دریافت وضعیت");
         }
         setStatus(result.data);
-      } catch (err: any) {
-        errorToast(err.message || "خطا در دریافت وضعیت");
+      } catch (err) {
+        errorToast(err || "خطا در دریافت وضعیت");
       }
     };
     fetchStatus();
@@ -235,8 +235,8 @@ export default function UpgradeToRealEstate() {
       successToast(result.message || "درخواست ارتقا با موفقیت ارسال شد");
       setFormData(initialFormData); // Reset form
       setStatus(result.data); // Update status
-    } catch (err: any) {
-      setError(err.message || "خطا در ارسال درخواست");
+    } catch (err) {
+      if (err) setError("خطا در ارسال درخواست");
     } finally {
       setIsSubmitting(false);
     }

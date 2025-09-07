@@ -114,9 +114,9 @@ export default function AddedProperties() {
         setProperties(mappedProperties);
         setFilteredProperties(mappedProperties); // Initially show all properties
         // eslint-disable-next-line
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching properties:", err);
-        setError(err.message || "خطا در دریافت اطلاعات");
+        setError("خطا در دریافت اطلاعات");
       } finally {
         setLoading(false);
       }
@@ -208,9 +208,9 @@ export default function AddedProperties() {
       setFilteredProperties((prev) => prev.filter((prop) => prop.id !== id));
 
       // eslint-disable-next-line
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error deleting property:", err);
-      setError(err.message || "خطا در حذف ملک");
+      setError("خطا در حذف ملک");
     }
   };
 

@@ -232,7 +232,7 @@ export default function UsersManagement() {
     }
   };
 
-  const handleToggleActive = async (id: number, currentStatus?: boolean) => {
+  const handleToggleActive = async (id: number) => {
     if (!TOKEN) {
       errorToast("توکن نامعتبر");
       return;
@@ -407,7 +407,7 @@ export default function UsersManagement() {
                   <FaEdit className="w-3 h-3" />
                 </button>
                 <button
-                  onClick={() => handleToggleActive(user.id, user.is_active)}
+                  onClick={() => handleToggleActive(user.id)}
                   className={`p-2 rounded-md border border-gray-300 bg-gray-100 text-sm transition-colors duration-200 ${
                     user.is_active
                       ? "text-red-600 hover:bg-red-50"

@@ -179,11 +179,13 @@ export default function Account() {
 
       successToast(result.message || "پروفایل با موفقیت به‌روزرسانی شد");
       // Update Redux store here instead of reloading
-    } catch (err: any) {
-      setErrors((prev) => ({
-        ...prev,
-        profile: err.message || "خطا در ارسال اطلاعات",
-      }));
+    } catch (err) {
+      if (err) {
+        setErrors((prev) => ({
+          ...prev,
+          profile: "خطا در ارسال اطلاعات",
+        }));
+      }
     } finally {
       setIsSubmitting((prev) => ({ ...prev, profile: false }));
     }
@@ -283,11 +285,13 @@ export default function Account() {
 
       successToast(result.message || "پروفایل با موفقیت تکمیل شد");
       // Update Redux store here instead of reloading
-    } catch (err: any) {
-      setErrors((prev) => ({
-        ...prev,
-        complete: err.message || "خطا در ارسال اطلاعات",
-      }));
+    } catch (err) {
+      if (err) {
+        setErrors((prev) => ({
+          ...prev,
+          complete: "خطا در ارسال اطلاعات",
+        }));
+      }
     } finally {
       setIsSubmitting((prev) => ({ ...prev, complete: false }));
     }
@@ -328,11 +332,13 @@ export default function Account() {
 
       successToast(result.message || "تصویر پروفایل با موفقیت آپلود شد");
       // Update Redux store here instead of reloading
-    } catch (err: any) {
-      setErrors((prev) => ({
-        ...prev,
-        image: err.message || "خطا در ارسال تصویر",
-      }));
+    } catch (err) {
+      if (err) {
+        setErrors((prev) => ({
+          ...prev,
+          image: "خطا در ارسال تصویر",
+        }));
+      }
     } finally {
       setIsSubmitting((prev) => ({ ...prev, image: false }));
     }
@@ -393,11 +399,13 @@ export default function Account() {
         new_password: "",
         new_password_confirmation: "",
       }));
-    } catch (err: any) {
-      setErrors((prev) => ({
-        ...prev,
-        password: err.message || "خطا در ارسال اطلاعات",
-      }));
+    } catch (err) {
+      if (err) {
+        setErrors((prev) => ({
+          ...prev,
+          password: "خطا در ارسال اطلاعات",
+        }));
+      }
     } finally {
       setIsSubmitting((prev) => ({ ...prev, password: false }));
     }

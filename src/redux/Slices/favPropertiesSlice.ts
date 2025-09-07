@@ -91,9 +91,9 @@ export const fetchFavorites = createAsyncThunk(
       const data = await res.json();
       console.log("Fetch Favorites Response:", data); // Debug response
       return data; // Return full response for processing
-    } catch (err: any) {
+    } catch (err) {
       console.error("Fetch Favorites Error:", err);
-      return rejectWithValue(err.message);
+      return rejectWithValue(err);
     }
   }
 );
@@ -124,9 +124,9 @@ export const deleteFavorite = createAsyncThunk(
       const data = await res.json();
       console.log("Delete Favorite Response:", data); // Debug response
       return { favoriteId, message: data.message };
-    } catch (err: any) {
+    } catch (err) {
       console.error("Delete Favorite Error:", err);
-      return rejectWithValue(err.message);
+      return rejectWithValue(err);
     }
   }
 );

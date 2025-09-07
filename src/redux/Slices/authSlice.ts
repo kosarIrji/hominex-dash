@@ -103,8 +103,8 @@ export const fetchClientProfile = createAsyncThunk(
 
       const { data } = await res.json();
       return data; // This will go into fulfilled payload
-    } catch (error: any) {
-      return rejectWithValue(error.message || "Request failed");
+    } catch (error) {
+      return rejectWithValue(error || "Request failed");
     }
   }
 );

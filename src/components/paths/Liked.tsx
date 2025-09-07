@@ -91,7 +91,7 @@ export default function Liked() {
           deleteFavorite({ favoriteId: id, token: session.user.access_token })
         ).unwrap();
         successToast(result.message);
-      } catch (e: any) {
+      } catch (e) {
         errorToast(e || "خطا در حذف علاقه‌مندی");
       }
     } else {
