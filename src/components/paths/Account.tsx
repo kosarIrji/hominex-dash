@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 import React, { useState, useEffect } from "react";
 import { RiAccountCircleLine } from "react-icons/ri";
@@ -32,16 +33,10 @@ export interface IClient {
     | "phd";
   national_code?: string;
   address?: string;
-  monthly_income?:
-    | "under_5m"
-    | "5m_to_10m"
-    | "10m_to_20m"
-    | "20m_to_50m"
-    | "over_50m";
 }
 
 export default function Account() {
-  const client = useSelector((state: RootState) => state.authSlice.client); // No need for type casting
+  const client = useSelector((state: RootState) => state.authSlice.client);
   const { data: session } = useSession();
   const token = session?.user?.access_token;
 
@@ -57,9 +52,7 @@ export default function Account() {
     education_level: client?.education_level || "",
     national_code: client?.national_code || "",
     address: client?.address || "",
-    monthly_income: client?.monthly_income || "",
     new_password: "",
-    current_password: "",
     new_password_confirmation: "",
     profile_image: null as File | null,
   });
@@ -178,7 +171,6 @@ export default function Account() {
       }
 
       successToast(result.message || "پروفایل با موفقیت به‌روزرسانی شد");
-      // Update Redux store here instead of reloading
     } catch (err) {
       if (err) {
         setErrors((prev) => ({
@@ -268,7 +260,6 @@ export default function Account() {
           education_level: formData.education_level || null,
           national_code: formData.national_code || null,
           address: formData.address || null,
-          monthly_income: formData.monthly_income || null,
         }),
       });
 
@@ -284,7 +275,6 @@ export default function Account() {
       }
 
       successToast(result.message || "پروفایل با موفقیت تکمیل شد");
-      // Update Redux store here instead of reloading
     } catch (err) {
       if (err) {
         setErrors((prev) => ({
@@ -320,6 +310,7 @@ export default function Account() {
       });
 
       const result = await response.json();
+      console.log(result);
       if (!response.ok) {
         if (response.status === 422) {
           throw new Error("تصویر نامعتبر است");
@@ -331,7 +322,6 @@ export default function Account() {
       }
 
       successToast(result.message || "تصویر پروفایل با موفقیت آپلود شد");
-      // Update Redux store here instead of reloading
     } catch (err) {
       if (err) {
         setErrors((prev) => ({
@@ -375,7 +365,6 @@ export default function Account() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          current_password: formData.current_password,
           new_password: formData.new_password,
           new_password_confirmation: formData.new_password_confirmation,
         }),
@@ -387,7 +376,7 @@ export default function Account() {
           throw new Error("اطلاعات رمز عبور نامعتبر است");
         }
         if (response.status === 401) {
-          throw new Error("رمز عبور فعلی نادرست است");
+          throw new Error("لطفاً دوباره وارد شوید");
         }
         throw new Error(result.message || "خطا در تغییر رمز عبور");
       }
@@ -395,7 +384,6 @@ export default function Account() {
       successToast(result.message || "رمز عبور با موفقیت تغییر یافت");
       setFormData((prev) => ({
         ...prev,
-        current_password: "",
         new_password: "",
         new_password_confirmation: "",
       }));
@@ -672,26 +660,6 @@ export default function Account() {
               maxLength={500}
             />
           </div>
-          <div>
-            <label
-              htmlFor="monthly_income"
-              className="block text-sm font-medium text-gray-700">
-              میزان درآمد ماهانه
-            </label>
-            <select
-              id="monthly_income"
-              name="monthly_income"
-              value={formData.monthly_income}
-              onChange={handleInputChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600">
-              <option value="">انتخاب کنید</option>
-              <option value="under_5m">زیر ۵ میلیون</option>
-              <option value="5m_to_10m">۵ تا ۱۰ میلیون</option>
-              <option value="10m_to_20m">۱۰ تا ۲۰ میلیون</option>
-              <option value="20m_to_50m">۲۰ تا ۵۰ میلیون</option>
-              <option value="over_50m">بالای ۵۰ میلیون</option>
-            </select>
-          </div>
           {errors.complete && (
             <div
               id="complete-error"
@@ -754,23 +722,6 @@ export default function Account() {
           onSubmit={handlePasswordChange}
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
           aria-describedby="password-error">
-          <div>
-            <label
-              htmlFor="current_password"
-              className="block text-sm font-medium text-gray-700">
-              رمز عبور فعلی
-            </label>
-            <input
-              id="current_password"
-              name="current_password"
-              type="password"
-              value={formData.current_password}
-              onChange={handleInputChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600"
-              placeholder="رمز عبور فعلی"
-              required
-            />
-          </div>
           <div>
             <label
               htmlFor="new_password"

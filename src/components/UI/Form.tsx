@@ -189,6 +189,7 @@ interface ApiPayload {
 export default function SubmitPropertyPage() {
   const { data: session, status } = useSession();
   const token = session?.user?.access_token;
+
   // Utility to format numbers with commas
   function formatNumberWithCommas(value: string): string {
     const num = value.replace(/[^\d]/g, "");
@@ -569,7 +570,6 @@ export default function SubmitPropertyPage() {
         body: JSON.stringify(cleanedPayload),
       });
       const result = await response.json();
-      // show errors here
       if (!response.ok) {
         if (response.status === 401) {
           errorToast("احراز هویت ناموفق - لطفاً دوباره وارد شوید.");
@@ -1004,7 +1004,7 @@ export default function SubmitPropertyPage() {
                     <label
                       htmlFor="total_units_in_floor"
                       className="block text-sm font-medium mb-1">
-                      تعداد واحد در طبقه
+                      تعداد کل واحد ها
                     </label>
                     <input
                       id="total_units_in_floor"
@@ -1373,6 +1373,54 @@ export default function SubmitPropertyPage() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Moved: Cooling/Heating Systems */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">
+                      سیستم سرمایش و گرمایش
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {coolingHeatingOptions.map(({ value, label }) => (
+                        <label key={value} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            value={value}
+                            checked={formData.cooling_heating_systems.includes(
+                              value
+                            )}
+                            onChange={(e) =>
+                              handleCheckboxChange(e, "cooling_heating_systems")
+                            }
+                            className="ml-2"
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Moved: Utilities */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">تأسیسات</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {utilitiesOptions.map(({ value, label }) => (
+                        <label key={value} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            value={value}
+                            checked={formData.utilities.includes(
+                              value as "water" | "electricity" | "gas" | "phone"
+                            )}
+                            onChange={(e) =>
+                              handleCheckboxChange(e, "utilities")
+                            }
+                            className="ml-2"
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </>
             )}
@@ -1481,66 +1529,22 @@ export default function SubmitPropertyPage() {
           </div>
         )}
 
-        {/* Amenities and Utilities */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">
-              سیستم سرمایش و گرمایش
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {coolingHeatingOptions.map(({ value, label }) => (
-                <label key={value} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value={value}
-                    checked={formData.cooling_heating_systems.includes(value)}
-                    onChange={(e) =>
-                      handleCheckboxChange(e, "cooling_heating_systems")
-                    }
-                    className="ml-2"
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">تأسیسات</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {utilitiesOptions.map(({ value, label }) => (
-                <label key={value} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value={value}
-                    checked={formData.utilities.includes(
-                      value as "water" | "electricity" | "gas" | "phone"
-                    )}
-                    onChange={(e) => handleCheckboxChange(e, "utilities")}
-                    className="ml-2"
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium mb-1">
-              توضیحات
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
-              placeholder="توضیحات ملک را وارد کنید"
-              rows={4}
-            />
-          </div>
+        {/* Description */}
+        <div className={`${showDetails ? "mt-20" : "mt-0"}`}>
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium mb-1">
+            توضیحات
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
+            placeholder="توضیحات ملک را وارد کنید"
+            rows={4}
+          />
         </div>
 
         <div className="flex sm:flex-row flex-col gap-2">

@@ -1,21 +1,30 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { CiCirclePlus } from "react-icons/ci";
 import { GoGear } from "react-icons/go";
 import { LuCalendarClock } from "react-icons/lu";
 import { MdOutlineWavingHand } from "react-icons/md";
 import SpotlightCard from "../../../blocks/Components/SpotlightCard/SpotlightCard";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import { useDispatch } from "react-redux";
 import { switchRoute } from "@/redux/Slices/routeSwitch";
 import { useSession } from "next-auth/react";
+import { errorToast } from "@/config/Toasts";
+import { url_v1 } from "@/config/urls";
+
 export default function Main() {
   const session = useSession();
-  console.log(session.data?.user?.access_token);
   const dispatch = useDispatch<AppDispatch>();
   const { client } = useSelector((state: RootState) => state.authSlice);
+
+  const [recentAds, setRecentAds] = useState<
+    {
+      id: number;
+      title: string;
+      date: string;
+    }[]
+  >([]);
 
   const stats = [
     {
@@ -33,14 +42,66 @@ export default function Main() {
       value: client.stats.approved_properties_count,
       href: "/ads",
     },
-    { label: "تکمیل پروفایل", value: "80%", href: "/profile" },
   ];
 
-  const recentAds = [
-    { title: "آپارتمان 80 متری نوساز", date: "1403/04/12" },
-    { title: "زمین 200 متری در لواسان", date: "1403/04/10" },
-  ];
-  // console.log(client);
+  const token = session.data?.user?.access_token;
+
+  useEffect(() => {
+    async function fetchProperties() {
+      if (!token) return;
+      try {
+        const res = await fetch(url_v1("/user/properties"), {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.status === 401) {
+          errorToast("احراز هویت ناموفق - لطفاً دوباره وارد شوید.");
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`خطا در دریافت اطلاعات: ${res.status}`);
+        }
+
+        const json = await res.json();
+
+        const mappedProperties = json.data.properties.properties.map(
+          (prop: { id: number; title: string; created_at: string }) => ({
+            id: prop.id,
+            title: prop.title,
+            date: new Date(prop.created_at).toLocaleDateString("fa-IR"), // Persian date
+          })
+        );
+
+        // Sort by date desc & pick last 3
+        interface Property {
+          id: number;
+          title: string;
+          date: string;
+        }
+
+        const latestThree: Property[] = mappedProperties
+          .sort(
+            (a: Property, b: Property) =>
+              new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+          .slice(0, 3);
+
+        setRecentAds(latestThree);
+      } catch (err) {
+        console.error("Error fetching properties:", err);
+      }
+    }
+
+    if (token) {
+      fetchProperties();
+    }
+  }, [token]);
+
   return (
     <div className="max-w-7xl mx-auto md:p-6 py-3 space-y-10" dir="rtl">
       <div>
@@ -54,7 +115,7 @@ export default function Main() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 md:gap-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 md:gap-6 gap-3">
         {stats.map((stat, i) => (
           <SpotlightCard
             key={i}
@@ -76,11 +137,11 @@ export default function Main() {
           <LuCalendarClock className="w-7 h-7" /> آگهی‌های اخیر شما
         </h3>
         <ul className="space-y-3">
-          {recentAds.map((ad, i) => (
+          {recentAds.map((ad) => (
             <li
-              key={i}
+              key={ad.id}
               className="bg-gray-50 shadow-md rounded-lg p-4 flex justify-between items-center">
-              <span className="text-gray-700 font-medium  text-sm">
+              <span className="text-gray-700 font-medium text-sm">
                 {ad.title}
               </span>
               <span className="text-gray-400 text-sm">{ad.date}</span>

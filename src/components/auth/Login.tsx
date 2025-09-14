@@ -230,7 +230,7 @@ export default function Login() {
           <span className="border-b w-1/5 md:w-1/4"></span>
           <span
             onClick={() => dispatch(toggleAuth())}
-            className="text-xs cursor-pointer text-black transition-colors">
+            className="text-xs cursor-pointer text-black transition bg-white p-2 rounded-sm ">
             عضویت در سایت
           </span>
           <span className="border-b w-1/5 md:w-1/4"></span>

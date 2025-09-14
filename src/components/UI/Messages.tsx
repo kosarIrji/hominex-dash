@@ -21,7 +21,9 @@ export default function Messages() {
         notifications.map((n) => (
           <li
             key={n.id}
-            className="flex flex-row-reverse relative items-start text-black text-right justify-end gap-2 text-[12px]">
+            className={`flex flex-row-reverse relative items-start text-black text-right justify-end gap-2 text-[12px]${
+              n.is_read ? " opacity-50" : ""
+            }`}>
             <span className="border-r border-blue-800 pr-2">{n.message}</span>
             <MdOutlineInfo className="min-w-3 min-h-3 absolute top-[-0.7rem] right-[-0.35rem] text-blue-800" />
           </li>
