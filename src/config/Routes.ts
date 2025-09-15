@@ -39,4 +39,24 @@ export const Routes = [
     path: "promotions",
     access: "admin",
   },
+  {
+    title: "مشتریان",
+    path: "clients",
+    access: "",
+  },
+  {
+    title: "گفتگو",
+    path: "Conversation",
+    access: "",
+  },
+  {
+    title: "وایت برد",
+    path: "whiteBoard",
+    access: "",
+  },
+  {
+    title: "هومینکس پلاس",
+    path: "plus",
+    access: "",
+  },
 ];

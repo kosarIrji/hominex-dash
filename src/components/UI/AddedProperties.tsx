@@ -113,7 +113,6 @@ export default function AddedProperties() {
 
         setProperties(mappedProperties);
         setFilteredProperties(mappedProperties); // Initially show all properties
-        // eslint-disable-next-line
       } catch (err) {
         console.error("Error fetching properties:", err);
         setError("خطا در دریافت اطلاعات");
@@ -206,8 +205,6 @@ export default function AddedProperties() {
       // Update state to remove the deleted property
       setProperties((prev) => prev.filter((prop) => prop.id !== id));
       setFilteredProperties((prev) => prev.filter((prop) => prop.id !== id));
-
-      // eslint-disable-next-line
     } catch (err) {
       console.error("Error deleting property:", err);
       setError("خطا در حذف ملک");

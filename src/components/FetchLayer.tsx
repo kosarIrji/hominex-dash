@@ -48,9 +48,6 @@ export default function FetchLayer({ children }: Props) {
             setTimeout(() => signOut(), 2000);
             return;
           }
-
-          const data = await res.json();
-          console.log("User data:", data);
         } catch (e) {
           console.error("Error in tokenCheck:", e);
         }

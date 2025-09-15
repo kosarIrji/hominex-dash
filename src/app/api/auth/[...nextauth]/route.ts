@@ -39,12 +39,6 @@ const authOptions: NextAuthConfig = {
             redirect: "manual",
           });
 
-          // console.log("Raw Response:", {
-          //   status: res.status,
-          //   statusText: res.statusText,
-          //   headers: Object.fromEntries(res.headers.entries()),
-          // });
-
           let result;
           try {
             result = await res.json();
@@ -52,8 +46,6 @@ const authOptions: NextAuthConfig = {
             console.error("Failed to parse JSON:", parseError);
             return null;
           }
-
-          // console.log("Parsed Result:", result);
 
           if (!res.ok || !result.success) {
             console.error("Login failed:", { status: res.status, result });
@@ -84,7 +76,6 @@ const authOptions: NextAuthConfig = {
   },
   callbacks: {
     async jwt({ token, user }) {
-      // console.log("JWT Callback - User:", user, "Token:", token);
       if (user) {
         const u = user as AuthUser;
         token.access_token = u.access_token;
@@ -98,7 +89,6 @@ const authOptions: NextAuthConfig = {
       return token;
     },
     async session({ session, token }) {
-      // console.log("Session Callback - Token:", token, "Session:", session);
       if (token?.user) {
         session.user = token.user as AuthUser;
         session.user.access_token = token.access_token as string;

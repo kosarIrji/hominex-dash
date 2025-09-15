@@ -18,6 +18,10 @@ import { LiaClipboardListSolid } from "react-icons/lia";
 import { useSession } from "next-auth/react";
 import { MdOutlineSwitchAccessShortcut } from "react-icons/md";
 import Link from "next/link";
+import { LuUsers } from "react-icons/lu";
+import { HiOutlineChatBubbleBottomCenterText } from "react-icons/hi2";
+import { PiStarFourFill } from "react-icons/pi";
+import { VscCircuitBoard } from "react-icons/vsc";
 
 export default function Sidebar() {
   const Sidebar = useSelector((state: RootState) => state.sidebarSlice.value);
@@ -44,7 +48,7 @@ export default function Sidebar() {
           <span className="font-bold">هومینکس</span>
         </Link>
       </div>
-      <ul className="flex flex-col overflow-y-auto gap-4 pt-10 pl-5 | [&>*]:flex [&>*]:items-center [&>*]:gap-2 [&>*]:px-2 [&>*]:py-2 [&>*]:cursor-pointer">
+      <ul className="flex flex-col h-[100%] overflow-y-scroll gap-4 pb-20 pt-10 pl-5 | [&>*]:flex [&>*]:items-center [&>*]:gap-2 [&>*]:px-2 [&>*]:py-2 [&>*]:cursor-pointer">
         {Routes.filter((item) => {
           // if route has no access restriction, always show
           if (!item.access) return true;
@@ -74,6 +78,14 @@ export default function Sidebar() {
             {i === 6 && <LiaClipboardListSolid className="w-5 h-5 mx-2" />}
             {i === 7 && (
               <MdOutlineSwitchAccessShortcut className="w-5 h-5 mx-2" />
+            )}
+            {i === 8 && <LuUsers className="w-5 h-5 mx-2" />}
+            {i === 9 && (
+              <HiOutlineChatBubbleBottomCenterText className="w-5 h-5 mx-2" />
+            )}
+            {i === 10 && <VscCircuitBoard className="w-5 h-5 mx-2 " />}
+            {i === 11 && (
+              <PiStarFourFill className="w-5 h-5 mx-2 text-purple-700" />
             )}
             {item.title}
           </li>

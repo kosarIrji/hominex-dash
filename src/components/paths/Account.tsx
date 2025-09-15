@@ -1,4 +1,3 @@
-/* eslint-disable */
 "use client";
 import React, { useState, useEffect } from "react";
 import { RiAccountCircleLine } from "react-icons/ri";
@@ -310,7 +309,6 @@ export default function Account() {
       });
 
       const result = await response.json();
-      console.log(result);
       if (!response.ok) {
         if (response.status === 422) {
           throw new Error("تصویر نامعتبر است");
@@ -538,8 +536,6 @@ export default function Account() {
               <option value="">انتخاب</option>
               <option value="single">مجرد</option>
               <option value="married">متاهل</option>
-              <option value="divorced">مطلقه</option>
-              <option value="widowed">بیوه</option>
             </select>
           </div>
           <div>

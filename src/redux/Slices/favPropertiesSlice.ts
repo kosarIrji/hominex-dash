@@ -74,7 +74,6 @@ export const fetchFavorites = createAsyncThunk(
   ) => {
     try {
       const url = url_v1(`/user/favorites?page=${page}`);
-      console.log("Request URL:", url); // Debug URL
       const res = await fetch(url, {
         method: "GET",
         headers: {
@@ -89,7 +88,6 @@ export const fetchFavorites = createAsyncThunk(
       }
 
       const data = await res.json();
-      console.log("Fetch Favorites Response:", data); // Debug response
       return data; // Return full response for processing
     } catch (err) {
       console.error("Fetch Favorites Error:", err);
@@ -107,7 +105,6 @@ export const deleteFavorite = createAsyncThunk(
   ) => {
     try {
       const url = url_v1(`/user/favorites/${favoriteId}`);
-      console.log("Delete Request URL:", url); // Debug URL
       const res = await fetch(url, {
         method: "DELETE",
         headers: {
@@ -122,7 +119,6 @@ export const deleteFavorite = createAsyncThunk(
       }
 
       const data = await res.json();
-      console.log("Delete Favorite Response:", data); // Debug response
       return { favoriteId, message: data.message };
     } catch (err) {
       console.error("Delete Favorite Error:", err);

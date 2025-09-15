@@ -7,7 +7,7 @@ export default function Socials() {
   return (
     <div className="flex z-[-1] flex-row-reverse sm:justify-between sm:px-5 mb-5  justify-center items-center w-full">
       <span className="shadow-2xl shadow-black hidden sm:block">
-        توسعه با 💪 توسط تیم هومینکس
+        توسعه توسط تیم هومینکس
       </span>
       <div className="flex flex-row gap-3 text-2xl ">
         <Link

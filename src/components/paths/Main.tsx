@@ -5,7 +5,7 @@ import { CiCirclePlus } from "react-icons/ci";
 import { GoGear } from "react-icons/go";
 import { LuCalendarClock } from "react-icons/lu";
 import { MdOutlineWavingHand } from "react-icons/md";
-import SpotlightCard from "../../../blocks/Components/SpotlightCard/SpotlightCard";
+import SpotlightCard from "../../blocks/Components/SpotlightCard/SpotlightCard";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { switchRoute } from "@/redux/Slices/routeSwitch";

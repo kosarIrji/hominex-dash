@@ -10,14 +10,6 @@ export default function AddTicketForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const ticketData = {
-      title,
-      message,
-      type,
-      urgency,
-    };
-
-    console.log("Submitting ticket:", ticketData);
     // You can send ticketData to your backend via fetch or axios here
   };
 

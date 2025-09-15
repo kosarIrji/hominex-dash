@@ -366,7 +366,6 @@ export default function SubmitPropertyPage() {
         [field]: currentArray.filter((item) => item !== parsedValue),
       });
     }
-    console.log(`Updated ${field}:`, formData[field]); // Debug log
   };
 
   const handleBooleanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -383,7 +382,6 @@ export default function SubmitPropertyPage() {
         const newFiles = files.filter((f) => !existing.has(f.name + f.size));
         return [...prev, ...newFiles].slice(0, 20); // Limit to 20 total
       });
-      console.log("Selected images:", selectedImages);
     }
   };
 
