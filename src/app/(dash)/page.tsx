@@ -39,6 +39,12 @@ const UsersManagement = dynamic(
 const Clients = dynamic(() => import("../../components/paths/Clients"), {
   loading: () => <LoadingSpinner />,
 });
+const Conversation = dynamic(
+  () => import("../../components/paths/Conversation"),
+  {
+    loading: () => <LoadingSpinner />,
+  }
+);
 
 export default function Page() {
   const route = useSelector((state: RootState) => state.routeSwitch.route);
@@ -63,6 +69,7 @@ export default function Page() {
         {route === "allProperties" && <AllProperties />}
         {route === "promotions" && <Promotions />}
         {route === "clients" && <Clients />}
+        {route === "Conversation" && <Conversation />}
       </div>
       <Link href={"https://hominex.ir"}>
         <RiHome3Line className="fixed bottom-10 left-10 cursor-pointer transition-colors hover:bg-blue-600 text-white backdrop-blur-2xl  bg-blue-400 shadow-2xl shadow-gray-400 rounded-md  min-w-6 box-content h-auto p-3" />
