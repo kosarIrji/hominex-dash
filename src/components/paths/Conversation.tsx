@@ -34,9 +34,6 @@ export default function Conversation() {
 
       {/* list of people */}
       <div className=" sm:w-1/4 w-full z-10 min-w-[15rem] h-[50%] sm:h-auto bottom-0 fixed sm:relative left-0 bg-white rounded-2xl shadow overflow-y-auto py-3">
-        <span className="absolute top-[-2rem] left-5 z-10 bg-red-500 text-white p-3 rounded-md">
-          X
-        </span>
         <ul className="flex flex-col">
           <li className="flex  rounded-2xl items-center justify-between p-4 mx-2 shadow cursor-pointer hover:shadow-2xs transition-shadow">
             <LuCircleDashed className="text-orange-400" />
